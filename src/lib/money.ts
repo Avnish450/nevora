@@ -16,6 +16,8 @@ export const ONE_USDT = BigInt(10 ** USDT_DECIMALS); // 1_000_000n
 export const INR_DECIMALS = 2;
 export const ONE_INR = BigInt(10 ** INR_DECIMALS); // 100n
 
+export const ZERO_BIGINT = BigInt(0);
+
 /**
  * Calculate order total in paise (rounded down).
  *
@@ -28,10 +30,10 @@ export function calculateTotalInrPaise(
   usdtAmount: bigint,
   priceInrPaise: bigint
 ): bigint {
-  if (usdtAmount <= 0n) {
+  if (usdtAmount <= ZERO_BIGINT) {
     throw new Error("USDT amount must be positive");
   }
-  if (priceInrPaise <= 0n) {
+  if (priceInrPaise <= ZERO_BIGINT) {
     throw new Error("Price must be positive");
   }
   return (usdtAmount * priceInrPaise) / ONE_USDT;
@@ -39,10 +41,10 @@ export function calculateTotalInrPaise(
 
 /**
  * Format USDT from smallest units to a human-readable string.
- * e.g., 1_500_000n → "1.500000"
+ * e.g., 1.5 USDT → "1.500000"
  */
 export function formatUsdt(units: bigint): string {
-  const isNegative = units < 0n;
+  const isNegative = units < ZERO_BIGINT;
   const abs = isNegative ? -units : units;
   const whole = abs / ONE_USDT;
   const frac = abs % ONE_USDT;
@@ -52,10 +54,10 @@ export function formatUsdt(units: bigint): string {
 
 /**
  * Format INR from paise to a human-readable string.
- * e.g., 8800n → "88.00"
+ * e.g., 8800 paise → "88.00"
  */
 export function formatInr(paise: bigint): string {
-  const isNegative = paise < 0n;
+  const isNegative = paise < ZERO_BIGINT;
   const abs = isNegative ? -paise : paise;
   const whole = abs / ONE_INR;
   const frac = abs % ONE_INR;

@@ -11,7 +11,7 @@ export async function POST(req: NextRequest) {
   try {
     const user = await getCurrentUser(client, req);
 
-    let amount = 100_000_000n; // Default 100 USDT
+    let amount = BigInt(100_000_000); // Default 100 USDT
     try {
       const body = await req.json();
       if (body.amount) {
@@ -21,7 +21,7 @@ export async function POST(req: NextRequest) {
       // Body is optional
     }
 
-    if (amount <= 0n) {
+    if (amount <= BigInt(0)) {
       return errorResponse("Amount must be greater than zero", 400);
     }
 

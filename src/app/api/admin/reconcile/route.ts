@@ -33,7 +33,7 @@ export async function GET(req: NextRequest) {
       ORDER BY a.id ASC
     `);
 
-    const formattedAccounts = accounts.map((a) => ({
+    const formattedAccounts = accounts.map((a: Record<string, any>) => ({
       id: a.id,
       userName: a.user_name || "System",
       asset: a.asset,

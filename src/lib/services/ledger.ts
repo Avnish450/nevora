@@ -41,8 +41,8 @@ export async function createJournal(
   entries: LedgerEntry[]
 ): Promise<JournalResult> {
   // Validate: entries must sum to zero
-  const sum = entries.reduce((acc, e) => acc + e.amount, 0n);
-  if (sum !== 0n) {
+  const sum = entries.reduce((acc, e) => acc + e.amount, BigInt(0));
+  if (sum !== BigInt(0)) {
     throw new Error(
       `Ledger entries must sum to zero, got ${sum.toString()}`
     );
@@ -110,7 +110,7 @@ export async function faucetCredit(
   userId: number,
   amount: bigint
 ): Promise<JournalResult> {
-  if (amount <= 0n) {
+  if (amount <= BigInt(0)) {
     throw new Error("Faucet amount must be positive");
   }
 
@@ -137,7 +137,7 @@ export async function lockFunds(
   referenceType: string,
   referenceId: number
 ): Promise<JournalResult> {
-  if (amount <= 0n) {
+  if (amount <= BigInt(0)) {
     throw new Error("Lock amount must be positive");
   }
 
@@ -165,7 +165,7 @@ export async function unlockFunds(
   referenceType: string,
   referenceId: number
 ): Promise<JournalResult> {
-  if (amount <= 0n) {
+  if (amount <= BigInt(0)) {
     throw new Error("Unlock amount must be positive");
   }
 
@@ -193,7 +193,7 @@ export async function releaseFunds(
   referenceType: string,
   referenceId: number
 ): Promise<JournalResult> {
-  if (amount <= 0n) {
+  if (amount <= BigInt(0)) {
     throw new Error("Release amount must be positive");
   }
 
@@ -218,7 +218,7 @@ export async function withdrawal(
   userId: number,
   amount: bigint
 ): Promise<JournalResult> {
-  if (amount <= 0n) {
+  if (amount <= BigInt(0)) {
     throw new Error("Withdrawal amount must be positive");
   }
 
@@ -270,8 +270,8 @@ export async function getUserBalances(
     [userId]
   );
 
-  let available = 0n;
-  let locked = 0n;
+  let available = BigInt(0);
+  let locked = BigInt(0);
 
   for (const row of rows) {
     const bal = BigInt(row.balance);

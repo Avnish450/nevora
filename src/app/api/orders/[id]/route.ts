@@ -48,8 +48,8 @@ export async function GET(
       `SELECT id, name, role FROM users WHERE id IN ($1, $2)`,
       [order.buyerId, order.sellerId]
     );
-    const buyer = users.find((u) => u.id === order.buyerId);
-    const seller = users.find((u) => u.id === order.sellerId);
+    const buyer = users.find((u: Record<string, any>) => u.id === order.buyerId);
+    const seller = users.find((u: Record<string, any>) => u.id === order.sellerId);
 
     // Fetch dispute info if any
     const { rows: disputes } = await client.query(

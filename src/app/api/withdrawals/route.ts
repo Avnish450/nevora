@@ -50,7 +50,7 @@ export async function POST(req: NextRequest) {
     }
 
     const amountUnits = parseUsdt(String(amount));
-    if (amountUnits <= 0n) {
+    if (amountUnits <= BigInt(0)) {
       return errorResponse("Amount must be greater than zero", 400);
     }
 

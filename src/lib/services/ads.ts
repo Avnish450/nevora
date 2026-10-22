@@ -65,9 +65,9 @@ export async function createAd(
     paymentDetails: string;
   }
 ): Promise<Ad> {
-  if (data.priceInrPaise <= 0n) throw new Error("Price must be greater than zero");
-  if (data.totalUsdt <= 0n) throw new Error("Total USDT must be greater than zero");
-  if (data.minUsdt <= 0n) throw new Error("Min USDT must be greater than zero");
+  if (data.priceInrPaise <= BigInt(0)) throw new Error("Price must be greater than zero");
+  if (data.totalUsdt <= BigInt(0)) throw new Error("Total USDT must be greater than zero");
+  if (data.minUsdt <= BigInt(0)) throw new Error("Min USDT must be greater than zero");
   if (data.maxUsdt < data.minUsdt) throw new Error("Max USDT cannot be less than Min USDT");
   if (data.maxUsdt > data.totalUsdt) throw new Error("Max USDT cannot exceed Total USDT");
   if (!data.paymentMethod.trim()) throw new Error("Payment method is required");

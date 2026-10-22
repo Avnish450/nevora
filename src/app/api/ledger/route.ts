@@ -36,7 +36,7 @@ export async function GET(req: NextRequest) {
         LIMIT 100
       `);
 
-      const formatted = rows.map((r) => ({
+      const formatted = rows.map((r: Record<string, any>) => ({
         id: r.id,
         journalId: r.journal_id,
         journalType: r.journal_type,

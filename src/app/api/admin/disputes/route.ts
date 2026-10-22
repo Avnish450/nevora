@@ -40,7 +40,7 @@ export async function GET(req: NextRequest) {
       ORDER BY d.created_at DESC
     `);
 
-    const disputes = rows.map((r) => ({
+    const disputes = rows.map((r: Record<string, any>) => ({
       ...r,
       usdtAmountFormatted: formatUsdt(BigInt(r.usdt_amount)),
       priceInrFormatted: formatInr(BigInt(r.price_inr_paise)),
