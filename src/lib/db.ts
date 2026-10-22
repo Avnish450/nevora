@@ -11,8 +11,10 @@ let pool: Pool | null = null;
 
 export function getPool(): Pool {
   if (!pool) {
-    const connectionString =
-      process.env.DATABASE_URL_TEST || process.env.DATABASE_URL;
+    const isTest = process.env.NODE_ENV === "test" || Boolean(process.env.VITEST);
+    const connectionString = isTest && process.env.DATABASE_URL_TEST
+      ? process.env.DATABASE_URL_TEST
+      : process.env.DATABASE_URL;
 
     if (!connectionString) {
       throw new Error("DATABASE_URL or DATABASE_URL_TEST must be set");
