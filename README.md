@@ -1,36 +1,151 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Nevora — P2P USDT/INR Marketplace Demo
 
-## Getting Started
+A working demo of a P2P cryptocurrency marketplace with escrow, built with fake money only.
 
-First, run the development server:
+**This demo proves one thing:** a buyer and a seller can complete a trade safely while the platform locks and releases the seller's USDT.
+
+No blockchain, no real payments, no real KYC.
+
+---
+
+## ⚠️ Known Limits
+
+This is a **demo with fake money**. It has no real authentication, no blockchain, no KYC, and no fraud controls. It must **not** be connected to real funds or deployed publicly without a security review and legal advice.
+
+---
+
+## Quick Start
+
+### Prerequisites
+
+- **Node.js** 18+ and npm
+- **PostgreSQL 16** (via Homebrew or Docker)
+
+### Option A: PostgreSQL via Homebrew (macOS)
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+brew install postgresql@16
+brew services start postgresql@16
+export PATH="/opt/homebrew/opt/postgresql@16/bin:$PATH"
+
+# Create dev and test databases
+createdb nevora
+createdb nevora_test
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Option B: PostgreSQL via Docker
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+docker compose up -d
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Setup & Run
 
-## Learn More
+```bash
+# 1. Install dependencies
+npm install
 
-To learn more about Next.js, take a look at the following resources:
+# 2. Copy environment file (if not already present)
+cp .env.example .env.local
+# Edit .env.local if your PostgreSQL credentials differ
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+# 3. Run migrations
+npm run migrate
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+# 4. Seed demo data
+npm run seed
 
-## Deploy on Vercel
+# 5. Start the dev server
+npm run dev
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Running Tests
+
+```bash
+# Ensure the test database exists and migrate it
+npm run migrate:test
+
+# Run tests
+npm test
+```
+
+---
+
+## Demo Users
+
+| User  | Role   | Starting Balance |
+| ----- | ------ | --------------- |
+| Alice | Seller | 1,000 USDT      |
+| Bob   | Buyer  | 0 USDT          |
+| Admin | Admin  | 0 USDT          |
+
+Use the **user switcher** in the top right to switch between users.
+
+---
+
+## Demo Walkthrough
+
+1. **Switch to Alice** → go to Wallet → she already has 1,000 USDT from the faucet
+2. **Switch to Alice** → go to Marketplace → she has an ad at ₹88.00/USDT
+3. **Switch to Bob** → go to Wallet → use the faucet to get some USDT (optional)
+4. **Switch to Bob** → go to Marketplace → click "Buy" on Alice's ad → enter amount → create order
+5. Alice's USDT is now **locked** in escrow
+6. **Bob** clicks "I've Paid" (simulating an INR bank transfer)
+7. **Switch to Alice** → go to My Orders → click the order → click "Release"
+8. Bob now has the USDT. Check the **Ledger** page to see every balance change.
+
+### Other Paths
+
+- **Cancel:** Bob can cancel a CREATED order → USDT unlocks back to Alice
+- **Expiry:** If Bob doesn't pay within 2 minutes (demo mode), the order expires → USDT unlocks
+- **Dispute:** Either party can dispute a PAID order → Admin resolves it
+- **Withdrawal:** Bob can simulate a withdrawal to a fake blockchain address
+
+---
+
+## Architecture
+
+```
+├── migrations/          SQL migration files
+├── scripts/             CLI scripts (migrate, seed, reset)
+├── src/
+│   ├── app/             Next.js App Router pages & API routes
+│   │   ├── api/         REST API endpoints
+│   │   └── ...          UI pages
+│   └── lib/             Shared library code
+│       ├── db.ts        Database connection pool
+│       ├── money.ts     Money utilities (bigint only)
+│       ├── config.ts    Application config
+│       └── services/    Business logic (ledger, orders, etc.)
+├── tests/               Vitest test files
+├── docker-compose.yml   PostgreSQL containers
+└── vitest.config.ts     Test configuration
+```
+
+## Money Rules
+
+- All amounts are stored as **bigint** (never floating point)
+- USDT: 6 decimals → 1 USDT = 1,000,000 units
+- INR: 2 decimals → 1 INR = 100 paise
+- Ledger entries are **immutable** (enforced by database trigger)
+- Every journal's entries sum to **exactly zero**
+- No user account balance may go **below zero** (enforced by CHECK constraint)
+
+## Tech Stack
+
+| Layer     | Choice                                       |
+| --------- | -------------------------------------------- |
+| Language  | TypeScript throughout                        |
+| App       | Next.js (App Router) with API route handlers |
+| Database  | PostgreSQL 16                                |
+| DB Access | `pg` with plain SQL (no ORM)                 |
+| Tests     | Vitest against a real test database           |
+| Styling   | Tailwind CSS                                 |
+
+---
+
+## License
+
+Demo only. Not for production use.

@@ -6,10 +6,18 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "migrate": "npx tsx scripts/migrate.ts",
+    "migrate:test": "npx tsx scripts/migrate.ts --test",
+    "seed": "npx tsx scripts/seed.ts",
+    "db:reset": "npx tsx scripts/reset-db.ts && npm run migrate && npm run seed",
+    "test": "DATABASE_URL_TEST=postgres://nevora_test:nevora_test@localhost:5433/nevora_test vitest run",
+    "test:watch": "DATABASE_URL_TEST=postgres://nevora_test:nevora_test@localhost:5433/nevora_test vitest"
   },
   "dependencies": {
+    "dotenv": "^18.0.9",
     "next": "16.4.2",
+    "pg": "^8.23.1",
     "react": "19.3.0",
     "react-dom": "19.3.0"
   },
@@ -21,6 +29,9 @@
     "eslint": "^9",
     "eslint-config-next": "16.4.2",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "tsx": "^4.23.15",
+    "typescript": "^5",
+    "vite": "^8.3.5",
+    "vitest": "^5.0.5"
   }
 }
