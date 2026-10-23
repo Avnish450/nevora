@@ -2,7 +2,9 @@
 
 import React, { useState, useEffect, useCallback } from "react";
 import { useUser } from "@/context/UserContext";
+import { useToast } from "@/components/Toast";
 import Link from "next/link";
+import CopyField from "@/components/CopyField";
 
 interface LedgerActivity {
   id: number;
@@ -14,8 +16,15 @@ interface LedgerActivity {
   createdAt: string;
 }
 
+const DEPOSIT_ADDRESSES = {
+  TRC20: "TYDzsYUEpvnYmQk4zGP9sWWcTEd2MiAtW6",
+  BEP20: "0x71C840A6B296dDE0ab9F9Ff5b4E19C5B28b030C8",
+  ERC20: "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045",
+};
+
 export default function WalletPage() {
   const { currentUser, balances, fetchWithUser, refreshUser } = useUser();
+  const { showToast } = useToast();
 
   // Mode: "overview" | "deposit" | "withdraw"
   const [activeTab, setActiveTab] = useState<"overview" | "deposit" | "withdraw">("overview");
@@ -23,7 +32,7 @@ export default function WalletPage() {
   // Faucet state (Deposit simulation)
   const [faucetAmount, setFaucetAmount] = useState("100");
   const [faucetLoading, setFaucetLoading] = useState(false);
-  const [faucetMessage, setFaucetMessage] = useState<string | null>(null);
+  const [depositNetwork, setDepositNetwork] = useState<"TRC20" | "BEP20" | "ERC20">("TRC20");
 
   // Withdrawal state
   const [network, setNetwork] = useState<"TRC20" | "BEP20" | "ERC20">("TRC20");
@@ -42,12 +51,6 @@ export default function WalletPage() {
 
   // Activity list
   const [activities, setActivities] = useState<LedgerActivity[]>([]);
-
-  const sampleAddresses = {
-    TRC20: "TYDzsYUEpvnYmQk4zGP9sWWcTEd2MiAtW6",
-    BEP20: "0x71C840A6B296dDE0ab9F9Ff5b4E19C5B28b030C8",
-    ERC20: "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045",
-  };
 
   const fetchActivity = useCallback(async () => {
     try {
@@ -95,7 +98,6 @@ export default function WalletPage() {
     e.preventDefault();
     try {
       setFaucetLoading(true);
-      setFaucetMessage(null);
       const res = await fetchWithUser("/api/dev/faucet", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -105,9 +107,9 @@ export default function WalletPage() {
       if (!res.ok) throw new Error(data.error || "Deposit failed");
       await refreshUser();
       await fetchActivity();
-      setFaucetMessage(`Credited ${data.creditedUsdt} USDT to your wallet via demo faucet.`);
+      showToast(`Credited ${data.creditedUsdt} USDT to your wallet via demo faucet.`, "success");
     } catch (err) {
-      alert((err as Error).message);
+      showToast((err as Error).message, "error");
     } finally {
       setFaucetLoading(false);
     }
@@ -165,9 +167,11 @@ export default function WalletPage() {
       setWithdrawStep("form");
       setWithdrawAmount("");
       setAddress("");
+      showToast(`Successfully processed withdrawal of ${data.amountFormatted} USDT.`, "success");
     } catch (err) {
       setWithdrawError((err as Error).message);
       setWithdrawStep("form");
+      showToast((err as Error).message, "error");
     } finally {
       setWithdrawLoading(false);
     }
@@ -179,19 +183,21 @@ export default function WalletPage() {
       <div className="space-y-1">
         <h1 className="text-2xl font-bold tracking-tight text-ink">USDT Wallet</h1>
         <p className="text-sm text-muted">
-          Your in-app balances, simulated deposits, and crypto withdrawals.
+          Your in-app balances, network-first deposits, and simulated crypto withdrawals.
         </p>
       </div>
 
-      {/* ── Balance Cards with One-Line Explanations ── */}
+      {/* ── Balance Cards with One-Line Explanations & Tabular Numbers ── */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {/* Available Balance */}
-        <div className="bg-surface border border-line rounded-card p-5 space-y-2">
+        <div className="bg-surface border border-line rounded-card p-5 space-y-2 shadow-xs">
           <div className="flex items-center justify-between">
             <span className="text-xs uppercase tracking-wider text-muted font-semibold">
               Available balance
             </span>
-            <span className="text-[11px] font-medium text-moss">Ready to trade</span>
+            <span className="text-[11px] font-medium text-moss bg-paper px-2 py-0.5 rounded-tag border border-line">
+              Ready to trade
+            </span>
           </div>
           <div className="flex items-baseline gap-2">
             <span className="text-3xl font-mono font-bold text-ink tabular-nums">
@@ -205,12 +211,14 @@ export default function WalletPage() {
         </div>
 
         {/* In Escrow Balance */}
-        <div className="bg-surface border border-line rounded-card p-5 space-y-2">
+        <div className="bg-surface border border-line rounded-card p-5 space-y-2 shadow-xs">
           <div className="flex items-center justify-between">
             <span className="text-xs uppercase tracking-wider text-muted font-semibold">
               In escrow
             </span>
-            <span className="text-[11px] font-medium text-amber">Active trades</span>
+            <span className="text-[11px] font-medium text-amber bg-paper px-2 py-0.5 rounded-tag border border-line">
+              Active trades
+            </span>
           </div>
           <div className="flex items-baseline gap-2">
             <span className="text-3xl font-mono font-bold text-amber tabular-nums">
@@ -250,7 +258,7 @@ export default function WalletPage() {
               : "text-muted hover:text-ink"
           }`}
         >
-          Deposit (Faucet)
+          Deposit (Network-First)
         </button>
         <button
           onClick={() => {
@@ -267,173 +275,187 @@ export default function WalletPage() {
         </button>
       </div>
 
-      {/* ── Tab 1: Overview & Activity ── */}
+      {/* ── TAB 1: OVERVIEW & RECENT ACTIVITY ── */}
       {activeTab === "overview" && (
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-xs uppercase tracking-wider text-muted font-semibold">
-              Recent activity
-            </h2>
-            <Link href="/ledger" className="text-xs text-moss hover:underline">
-              View full ledger →
-            </Link>
-          </div>
-
-          {activities.length === 0 ? (
-            <div className="p-8 text-center bg-surface border border-line rounded-card text-xs text-muted">
-              No recent wallet transactions.
+        <div className="space-y-6">
+          <div className="bg-surface border border-line rounded-card p-5 space-y-4 shadow-xs">
+            <div className="flex items-center justify-between border-b border-line pb-3">
+              <div>
+                <h2 className="text-sm font-semibold text-ink">Recent Wallet Activity</h2>
+                <p className="text-xs text-muted mt-0.5">
+                  Synchronized with the platform&apos;s zero-sum double-entry ledger.
+                </p>
+              </div>
+              <Link
+                href="/ledger"
+                className="text-xs font-medium text-moss hover:underline"
+              >
+                View full ledger audit &rarr;
+              </Link>
             </div>
-          ) : (
-            <div className="bg-surface border border-line rounded-card overflow-hidden">
-              <table className="w-full text-left text-xs">
-                <thead className="bg-paper border-b border-line text-muted uppercase text-[10px] tracking-wider font-semibold">
-                  <tr>
-                    <th className="py-2.5 px-4">Event</th>
-                    <th className="py-2.5 px-4">Bucket</th>
-                    <th className="py-2.5 px-4 text-right">Amount</th>
-                    <th className="py-2.5 px-4 text-right">Time</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-line font-mono text-xs">
-                  {activities.map((a) => {
-                    const isCredit = !a.amountFormatted.startsWith("-");
-                    return (
-                      <tr key={a.id} className="hover:bg-paper/40">
-                        <td className="py-3 px-4 font-sans font-medium text-ink capitalize">
-                          {a.journalType}
-                        </td>
-                        <td className="py-3 px-4 uppercase text-[10px] text-muted font-sans">
-                          {a.accountKind}
-                        </td>
-                        <td
-                          className={`py-3 px-4 text-right font-semibold tabular-nums ${
-                            isCredit ? "text-buy" : "text-alert"
+
+            {activities.length === 0 ? (
+              <div className="py-8 text-center text-xs text-muted">
+                No recent activity recorded.
+              </div>
+            ) : (
+              <div className="divide-y divide-line">
+                {activities.map((act) => {
+                  const isCredit = !act.amountFormatted.startsWith("-");
+                  return (
+                    <div
+                      key={act.id}
+                      className="py-3 flex items-center justify-between text-xs hover:bg-paper/30 transition-colors"
+                    >
+                      <div className="space-y-0.5">
+                        <div className="flex items-center gap-2">
+                          <span className="font-semibold text-ink uppercase text-[11px]">
+                            {act.journalType}
+                          </span>
+                          <span className="text-[10px] text-muted font-mono">
+                            Journal #{act.journalId}
+                          </span>
+                        </div>
+                        <span className="text-[11px] text-muted font-mono tabular-nums">
+                          {new Date(act.createdAt).toLocaleString()}
+                        </span>
+                      </div>
+
+                      <div className="text-right">
+                        <span
+                          className={`font-mono font-bold text-sm tabular-nums ${
+                            isCredit ? "text-buy" : "text-ink"
                           }`}
                         >
-                          {isCredit ? `+${a.amountFormatted}` : a.amountFormatted} USDT
-                        </td>
-                        <td className="py-3 px-4 text-right text-muted font-sans text-[11px]">
-                          {new Date(a.createdAt).toLocaleTimeString([], {
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          })}
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          )}
+                          {act.amountFormatted} USDT
+                        </span>
+                        <span className="block text-[10px] text-muted uppercase">
+                          {act.accountKind}
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
         </div>
       )}
 
-      {/* ── Tab 2: Deposit (Simulated Faucet) ── */}
+      {/* ── TAB 2: NETWORK-FIRST DEPOSIT (FAUCET) ── */}
       {activeTab === "deposit" && (
-        <div className="max-w-[540px] bg-surface border border-line rounded-card p-6 space-y-5">
-          <div>
-            <h2 className="text-base font-semibold text-ink">Demo USDT deposit</h2>
-            <p className="text-xs text-muted mt-1 leading-relaxed">
-              Mint demo USDT into your wallet to test trading. The platform records this against the system reserve account.
+        <div className="bg-surface border border-line rounded-card p-6 space-y-6 shadow-xs max-w-xl">
+          <div className="space-y-1">
+            <h2 className="text-base font-semibold text-ink">Deposit USDT</h2>
+            <p className="text-xs text-muted">
+              Select your blockchain network. In this demo environment, you can claim simulated USDT directly to your available balance.
             </p>
           </div>
 
-          {/* Persistent Network Warning */}
-          <div className="p-3 bg-paper border border-line rounded-input text-xs text-muted">
-            <strong className="text-ink">Persistent note:</strong> This is a fake-money testing faucet. No real cryptocurrency or tokens are moved.
-          </div>
-
-          {faucetMessage && (
-            <div className="p-3 bg-paper border border-line rounded-input text-xs text-moss font-medium">
-              ✓ {faucetMessage}
-            </div>
-          )}
-
-          <form onSubmit={handleFaucetDeposit} className="space-y-4 text-xs">
-            <div>
-              <label className="block uppercase tracking-wider text-muted font-semibold mb-1">
-                Amount to credit (USDT)
-              </label>
-              <div className="relative">
-                <input
-                  type="number"
-                  step="any"
-                  min="1"
-                  value={faucetAmount}
-                  onChange={(e) => setFaucetAmount(e.target.value)}
-                  className="w-full bg-paper border border-line rounded-input py-2 px-3 text-ink font-mono focus:outline-none focus:border-moss"
-                />
-                <span className="absolute right-3 top-2 text-muted font-mono font-medium">
-                  USDT
-                </span>
-              </div>
-            </div>
-
-            <div className="flex gap-2">
-              {["50", "100", "500", "1000"].map((v) => (
+          {/* Network Selection Chips */}
+          <div className="space-y-1.5">
+            <span className="text-xs font-medium text-muted block">1. Select Network</span>
+            <div className="grid grid-cols-3 gap-2">
+              {(["TRC20", "BEP20", "ERC20"] as const).map((net) => (
                 <button
-                  key={v}
+                  key={net}
                   type="button"
-                  onClick={() => setFaucetAmount(v)}
-                  className="px-2.5 py-1 rounded-input border border-line bg-paper text-muted hover:text-ink font-mono text-[11px]"
+                  onClick={() => setDepositNetwork(net)}
+                  className={`py-2 px-3 rounded-input text-xs font-mono font-medium border text-center transition-colors btn-press ${
+                    depositNetwork === net
+                      ? "bg-paper border-moss text-moss font-semibold shadow-xs"
+                      : "bg-surface border-line text-muted hover:text-ink"
+                  }`}
                 >
-                  +{v}
+                  {net}
                 </button>
               ))}
             </div>
+          </div>
 
-            <button
-              type="submit"
-              disabled={faucetLoading}
-              className="w-full py-2.5 px-4 rounded-input bg-moss text-xs font-semibold disabled:opacity-40"
-            >
-              {faucetLoading ? "Crediting..." : "Credit demo USDT"}
-            </button>
-          </form>
-        </div>
-      )}
-
-      {/* ── Tab 3: Withdraw ── */}
-      {activeTab === "withdraw" && (
-        <div className="max-w-[540px] bg-surface border border-line rounded-card p-6 space-y-5">
-          <div>
-            <h2 className="text-base font-semibold text-ink">Simulated withdrawal</h2>
-            <p className="text-xs text-muted mt-1 leading-relaxed">
-              Order of operations: select network, enter destination address, then enter amount.
+          {/* Copyable Deposit Address */}
+          <div className="space-y-1.5">
+            <span className="text-xs font-medium text-muted block">
+              2. Deposit Address ({depositNetwork})
+            </span>
+            <CopyField
+              value={DEPOSIT_ADDRESSES[depositNetwork]}
+              label={`Your ${depositNetwork} Deposit Address`}
+            />
+            <p className="text-[11px] text-muted">
+              Send only USDT ({depositNetwork}) to this address. Credits after 1 network confirmation.
             </p>
           </div>
 
+          {/* Demo Simulated Instant Faucet */}
+          <div className="pt-4 border-t border-line space-y-3">
+            <span className="text-xs font-semibold text-ink block">
+              Demo Environment: Instant Faucet
+            </span>
+            <form onSubmit={handleFaucetDeposit} className="space-y-3">
+              <div className="flex items-center gap-2">
+                <input
+                  type="number"
+                  min="1"
+                  max="10000"
+                  value={faucetAmount}
+                  onChange={(e) => setFaucetAmount(e.target.value)}
+                  className="bg-paper border border-line rounded-input px-3 py-2 text-xs font-mono text-ink focus:outline-none focus:border-moss w-32 tabular-nums"
+                />
+                <span className="text-xs font-mono text-muted">USDT</span>
+                <button
+                  type="submit"
+                  disabled={faucetLoading}
+                  className="px-4 py-2 rounded-input bg-moss text-white text-xs font-semibold hover:opacity-95 disabled:opacity-40 btn-press ml-auto shadow-xs"
+                >
+                  {faucetLoading ? "Crediting..." : "Claim from faucet"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ── TAB 3: STEP-BY-STEP WITHDRAWAL ── */}
+      {activeTab === "withdraw" && (
+        <div className="space-y-6 max-w-xl">
+          {/* Withdrawal Result Confirmation Card */}
           {withdrawResult && (
-            <div className="p-4 bg-paper border border-line rounded-input text-xs space-y-2">
-              <span className="text-moss font-semibold block">
-                ✓ Withdrawal simulated successfully
-              </span>
-              <p className="text-muted">
-                Sent <strong className="text-ink">{withdrawResult.amount} USDT</strong> over {withdrawResult.network} to:
-              </p>
-              <p className="font-mono text-ink text-[11px] select-all break-all bg-surface p-2 rounded-input border border-line">
-                {withdrawResult.address}
-              </p>
-              <div className="pt-1">
-                <span className="text-[10px] text-muted uppercase font-semibold block">Simulated Tx Hash:</span>
-                <span className="font-mono text-[11px] text-muted break-all">{withdrawResult.txHash}</span>
+            <div className="p-5 rounded-card bg-surface border border-line space-y-3 animate-fade-up shadow-xs">
+              <div className="flex items-center gap-2 text-buy font-semibold text-sm">
+                <span>✓</span>
+                <span>Withdrawal Broadcasted Successfully</span>
+              </div>
+              <div className="p-3 bg-paper border border-line rounded-input space-y-1.5 text-xs font-mono">
+                <div className="flex justify-between">
+                  <span className="text-muted font-sans">Amount:</span>
+                  <span className="font-bold text-ink tabular-nums">{withdrawResult.amount} USDT</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted font-sans">Network:</span>
+                  <span className="text-ink">{withdrawResult.network}</span>
+                </div>
+                <div className="space-y-1 pt-1 border-t border-line">
+                  <span className="text-muted font-sans block text-[11px]">Transaction Hash:</span>
+                  <span className="break-all text-[11px] text-moss select-all">{withdrawResult.txHash}</span>
+                </div>
               </div>
             </div>
           )}
 
-          {withdrawError && (
-            <div className="p-3 bg-paper border border-alert/30 rounded-input text-xs text-alert">
-              {withdrawError}
-            </div>
-          )}
+          {/* Step 1: Form */}
+          {withdrawStep === "form" && (
+            <form onSubmit={handleWithdrawNext} className="bg-surface border border-line rounded-card p-6 space-y-5 shadow-xs">
+              <div className="space-y-1">
+                <h2 className="text-base font-semibold text-ink">Withdraw USDT</h2>
+                <p className="text-xs text-muted">
+                  Withdraw your available balance to an external blockchain address.
+                </p>
+              </div>
 
-          {withdrawStep === "form" ? (
-            <form onSubmit={handleWithdrawNext} className="space-y-4 text-xs">
-              {/* 1. Network Selector */}
-              <div>
-                <label className="block uppercase tracking-wider text-muted font-semibold mb-1">
-                  1. Network
-                </label>
+              {/* Network Selector */}
+              <div className="space-y-1.5">
+                <label className="text-xs font-medium text-muted block">1. Network</label>
                 <div className="grid grid-cols-3 gap-2">
                   {(["TRC20", "BEP20", "ERC20"] as const).map((net) => (
                     <button
@@ -441,12 +463,12 @@ export default function WalletPage() {
                       type="button"
                       onClick={() => {
                         setNetwork(net);
-                        setAddress("");
+                        setAddress(DEPOSIT_ADDRESSES[net]);
                       }}
-                      className={`py-2 text-xs font-medium rounded-input border transition-colors ${
+                      className={`py-2 px-3 rounded-input text-xs font-mono font-medium border text-center transition-colors btn-press ${
                         network === net
-                          ? "bg-paper text-ink font-semibold border-moss"
-                          : "bg-surface text-muted border-line hover:text-ink"
+                          ? "bg-paper border-moss text-moss font-semibold shadow-xs"
+                          : "bg-surface border-line text-muted hover:text-ink"
                       }`}
                     >
                       {net}
@@ -455,56 +477,40 @@ export default function WalletPage() {
                 </div>
               </div>
 
-              {/* 2. Destination Address with Live Format Validation */}
-              <div>
-                <div className="flex items-center justify-between mb-1">
-                  <label className="uppercase tracking-wider text-muted font-semibold">
-                    2. Destination address
-                  </label>
+              {/* Destination Address */}
+              <div className="space-y-1.5">
+                <div className="flex justify-between text-xs">
+                  <label className="font-medium text-muted">2. Destination Address</label>
                   <button
                     type="button"
-                    onClick={() => setAddress(sampleAddresses[network])}
-                    className="text-[11px] text-moss hover:underline"
+                    onClick={() => setAddress(DEPOSIT_ADDRESSES[network])}
+                    className="text-moss text-[11px] hover:underline"
                   >
-                    Paste sample {network}
+                    Use sample address
                   </button>
                 </div>
                 <input
                   type="text"
                   value={address}
                   onChange={(e) => setAddress(e.target.value)}
-                  placeholder={
-                    network === "TRC20"
-                      ? "T... (34 characters)"
-                      : "0x... (42 characters)"
-                  }
+                  placeholder={`Enter ${network} address...`}
                   required
-                  className={`w-full bg-paper border rounded-input py-2 px-3 font-mono text-ink text-xs focus:outline-none ${
-                    addressValidationMsg ? "border-alert" : "border-line focus:border-moss"
-                  }`}
+                  className="w-full bg-paper border border-line rounded-input p-2.5 text-xs font-mono text-ink focus:outline-none focus:border-moss"
                 />
                 {addressValidationMsg && (
-                  <p className="text-[11px] text-alert mt-1">{addressValidationMsg}</p>
+                  <p className="text-[11px] text-amber">{addressValidationMsg}</p>
                 )}
               </div>
 
-              {/* 3. Amount */}
-              <div>
-                <div className="flex items-center justify-between mb-1">
-                  <label className="uppercase tracking-wider text-muted font-semibold">
-                    3. Withdrawal amount
-                  </label>
-                  <button
-                    type="button"
-                    onClick={() =>
-                      balances && setWithdrawAmount(balances.availableFormatted.replace(/,/g, ""))
-                    }
-                    className="text-[11px] text-moss hover:underline font-mono tabular-nums"
-                  >
-                    Max ({balances?.availableFormatted ?? 0} USDT)
-                  </button>
+              {/* Amount */}
+              <div className="space-y-1.5">
+                <div className="flex justify-between text-xs">
+                  <label className="font-medium text-muted">3. Amount</label>
+                  <span className="text-muted text-[11px] font-mono">
+                    Avail: {balances?.availableFormatted ?? "0.00"} USDT
+                  </span>
                 </div>
-                <div className="relative">
+                <div className="flex items-center gap-2 bg-paper border border-line rounded-input px-3 py-2 focus-within:border-moss">
                   <input
                     type="number"
                     step="any"
@@ -512,77 +518,83 @@ export default function WalletPage() {
                     onChange={(e) => setWithdrawAmount(e.target.value)}
                     placeholder="0.00"
                     required
-                    className="w-full bg-paper border border-line rounded-input py-2 px-3 font-mono text-ink text-xs focus:outline-none focus:border-moss"
+                    className="flex-1 bg-transparent text-xs font-mono text-ink focus:outline-none tabular-nums"
                   />
-                  <span className="absolute right-3 top-2 text-muted font-mono font-medium">
-                    USDT
-                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setWithdrawAmount(balances?.availableFormatted.replace(/,/g, "") || "0")}
+                    className="text-xs font-semibold text-moss px-2 py-0.5 rounded-tag bg-surface border border-line hover:bg-paper"
+                  >
+                    Max
+                  </button>
                 </div>
               </div>
 
-              {/* Network Fee line */}
-              <div className="flex items-center justify-between text-muted text-xs pt-1 border-t border-line">
-                <span>Network fee:</span>
-                <span className="font-mono text-ink font-medium">0.00 USDT (Demo waived)</span>
-              </div>
+              {withdrawError && (
+                <div className="p-2.5 bg-paper border border-alert/30 rounded-input text-xs text-alert animate-shake">
+                  {withdrawError}
+                </div>
+              )}
 
               <button
                 type="submit"
-                className="w-full py-2.5 px-4 rounded-input bg-moss text-xs font-semibold"
+                className="w-full py-3 rounded-input bg-moss text-white font-semibold text-xs hover:opacity-95 btn-press shadow-xs"
               >
-                Review withdrawal details →
+                Review Withdrawal Summary &rarr;
               </button>
             </form>
-          ) : (
-            /* Withdrawal Summary / Confirm Screen */
-            <div className="space-y-4 text-xs">
-              <div className="bg-paper border border-line rounded-input p-4 space-y-2.5">
-                <span className="text-[11px] uppercase tracking-wider text-muted font-semibold block">
-                  Confirm withdrawal details
-                </span>
-                <div className="flex justify-between border-b border-line pb-2">
+          )}
+
+          {/* Step 2: Confirmation Dialog */}
+          {withdrawStep === "confirm" && (
+            <div className="bg-surface border border-line rounded-card p-6 space-y-5 animate-fade-up shadow-xs">
+              <div className="space-y-1">
+                <h2 className="text-base font-semibold text-ink">Review &amp; Confirm Withdrawal</h2>
+                <p className="text-xs text-muted">
+                  Double check the destination network and address. Blockchain transactions are irreversible.
+                </p>
+              </div>
+
+              <div className="p-4 bg-paper border border-line rounded-input space-y-2 text-xs">
+                <div className="flex justify-between">
                   <span className="text-muted">Network:</span>
-                  <strong className="text-ink font-semibold">{network}</strong>
+                  <span className="font-mono font-semibold text-ink">{network}</span>
                 </div>
-                <div className="flex justify-between border-b border-line pb-2">
-                  <span className="text-muted">Destination:</span>
-                  <span className="font-mono text-ink text-[11px] select-all max-w-[280px] truncate">
-                    {address}
-                  </span>
+                <div className="flex justify-between">
+                  <span className="text-muted">Withdrawal amount:</span>
+                  <span className="font-mono font-bold text-ink tabular-nums">{withdrawAmount} USDT</span>
                 </div>
-                <div className="flex justify-between border-b border-line pb-2">
-                  <span className="text-muted">Amount:</span>
-                  <span className="font-mono font-semibold text-ink tabular-nums">
-                    {parseFloat(withdrawAmount).toFixed(2)} USDT
-                  </span>
+                <div className="flex justify-between">
+                  <span className="text-muted">Network fee:</span>
+                  <span className="font-mono text-buy font-semibold">0.00 USDT (Zero fee)</span>
                 </div>
-                <div className="flex justify-between pt-1">
-                  <span className="text-muted">You will receive:</span>
-                  <span className="font-mono font-bold text-ink tabular-nums">
-                    {parseFloat(withdrawAmount).toFixed(2)} USDT
-                  </span>
+                <div className="space-y-1 pt-2 border-t border-line">
+                  <span className="text-muted block text-[11px]">Recipient Address:</span>
+                  <span className="font-mono text-[11px] text-ink break-all select-all">{address}</span>
                 </div>
               </div>
 
-              <p className="text-[11px] text-muted leading-relaxed">
-                Irreversible simulated action: your in-app available USDT will be debited and transferred to the system account.
-              </p>
+              {withdrawError && (
+                <div className="p-2.5 bg-paper border border-alert/30 rounded-input text-xs text-alert animate-shake">
+                  {withdrawError}
+                </div>
+              )}
 
-              <div className="flex gap-3 pt-1">
+              <div className="flex gap-3">
                 <button
                   type="button"
                   onClick={() => setWithdrawStep("form")}
-                  className="flex-1 py-2 px-3 rounded-input border border-line text-muted hover:text-ink text-xs font-medium"
+                  className="flex-1 py-2.5 px-3 rounded-input border border-line text-xs font-medium text-muted hover:text-ink btn-press"
                 >
-                  Edit details
+                  Back
                 </button>
                 <button
                   type="button"
-                  onClick={handleConfirmWithdraw}
                   disabled={withdrawLoading}
-                  className="flex-1 py-2 px-3 rounded-input bg-moss text-xs font-semibold disabled:opacity-40"
+                  onClick={handleConfirmWithdraw}
+                  className="flex-1 py-2.5 px-3 rounded-input bg-moss text-white text-xs font-semibold disabled:opacity-40 btn-press shadow-xs"
                 >
-                  {withdrawLoading ? "Processing..." : "Confirm withdrawal"}
+                  {withdrawLoading ? "Broadcasting..." : "Confirm & Send"}
                 </button>
               </div>
             </div>
