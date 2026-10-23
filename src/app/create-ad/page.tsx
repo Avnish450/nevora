@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useUser } from "@/context/UserContext";
+import SpotlightCard from "@/components/SpotlightCard";
 
 export default function CreateAdPage() {
   const router = useRouter();
@@ -56,16 +57,20 @@ export default function CreateAdPage() {
   return (
     <div className="max-w-[560px] mx-auto space-y-6">
       <div className="space-y-1">
-        <h1 className="text-2xl font-bold tracking-tight text-ink">Post Sell Advertisement</h1>
+        <h1 className="text-2xl font-bold tracking-tight text-ink font-['Plus_Jakarta_Sans']">Post Sell Advertisement</h1>
         <p className="text-sm text-muted">
           Offer your USDT for INR. Funds are locked into escrow when a buyer initiates an order.
         </p>
       </div>
 
-      <div className="bg-surface border border-line rounded-card p-6 space-y-5">
-        <div className="bg-paper border border-line rounded-input p-3 flex items-center justify-between text-xs">
-          <span className="text-muted">Your available balance:</span>
-          <span className="font-mono font-semibold text-ink tabular-nums">
+      <SpotlightCard
+        className="p-6 sm:p-7 space-y-5"
+        spotlightColor="rgba(124, 58, 237, 0.10)"
+        borderColor="rgba(167, 139, 250, 0.45)"
+      >
+        <div className="bg-purple-50 dark:bg-purple-950/40 border border-purple-200/60 dark:border-purple-800/60 rounded-2xl p-3 flex items-center justify-between text-xs">
+          <span className="text-muted font-medium">Your available balance:</span>
+          <span className="font-mono font-bold text-purple-700 dark:text-purple-300 tabular-nums">
             {balances?.availableFormatted ?? "0.00"} USDT
           </span>
         </div>
@@ -191,12 +196,12 @@ export default function CreateAdPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-2.5 px-4 rounded-input bg-moss text-xs font-semibold disabled:opacity-40"
+            className="w-full py-3.5 px-6 rounded-full bg-gradient-to-r from-purple-600 via-violet-600 to-purple-700 text-white text-xs font-bold shadow-lg shadow-purple-600/25 hover:shadow-xl hover:shadow-purple-600/35 active:scale-[0.98] transition-all disabled:opacity-40"
           >
-            {loading ? "Publishing..." : "Publish advertisement"}
+            {loading ? "Publishing ad..." : "Publish advertisement"}
           </button>
         </form>
-      </div>
+      </SpotlightCard>
     </div>
   );
 }

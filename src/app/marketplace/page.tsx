@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useUser } from "@/context/UserContext";
 import Link from "next/link";
 import { formatIndianInr } from "@/lib/tokens";
+import SpotlightCard from "@/components/SpotlightCard";
 
 interface Ad {
   id: number;
@@ -293,19 +294,24 @@ export default function MarketplacePage() {
       ) : (
         <div className="space-y-4">
           {/* Mobile Card View (< sm) */}
-          <div className="sm:hidden divide-y divide-line bg-surface border border-line rounded-card overflow-hidden shadow-xs">
+          <div className="sm:hidden space-y-3">
             {filteredAds.map((ad) => {
               const isOwner = currentUser?.id === ad.sellerId;
               return (
-                <div key={ad.id} className="p-4 space-y-2.5">
+                <SpotlightCard
+                  key={ad.id}
+                  className="p-4 space-y-2.5"
+                  spotlightColor="rgba(124, 58, 237, 0.10)"
+                  borderColor="rgba(167, 139, 250, 0.4)"
+                >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <span className="font-semibold text-ink text-sm">{ad.sellerName}</span>
-                      <span className="text-[10px] text-buy font-medium bg-paper px-1.5 py-0.5 rounded-tag border border-line">
+                      <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-medium bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded-full border border-emerald-200/50">
                         ✓ 100%
                       </span>
                       {isOwner && (
-                        <span className="text-[10px] px-1.5 py-0.5 rounded-tag bg-paper border border-line text-muted">
+                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-purple-50 dark:bg-purple-950/40 border border-purple-200/50 text-purple-700 dark:text-purple-300">
                           You
                         </span>
                       )}
@@ -319,7 +325,7 @@ export default function MarketplacePage() {
 
                   <div className="flex items-center justify-between text-xs font-mono text-muted">
                     <span>Avail: {ad.remainingUsdtFormatted} USDT</span>
-                    <span className="px-2 py-0.5 rounded-tag bg-paper border border-line text-ink font-sans text-[11px]">
+                    <span className="px-2.5 py-0.5 rounded-full bg-purple-50 dark:bg-purple-950/40 border border-purple-200/60 text-purple-700 dark:text-purple-300 font-sans text-[11px] font-semibold">
                       {ad.paymentMethod}
                     </span>
                   </div>
@@ -331,16 +337,16 @@ export default function MarketplacePage() {
                     <button
                       onClick={() => handleOpenBuy(ad)}
                       disabled={isOwner}
-                      className={`px-4 py-2 rounded-input text-xs font-semibold btn-press ${
+                      className={`px-4 py-2 rounded-full text-xs font-bold transition-all ${
                         isOwner
-                          ? "bg-paper text-muted border border-line cursor-not-allowed"
-                          : "bg-moss text-white shadow-xs"
+                          ? "bg-surface-subtle text-muted border border-line cursor-not-allowed"
+                          : "bg-gradient-to-r from-purple-600 to-violet-600 text-white shadow-md shadow-purple-600/25 active:scale-[0.98]"
                       }`}
                     >
                       {isOwner ? "Your ad" : "Buy USDT"}
                     </button>
                   </div>
-                </div>
+                </SpotlightCard>
               );
             })}
           </div>

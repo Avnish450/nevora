@@ -5,6 +5,7 @@ import { useUser } from "@/context/UserContext";
 import { useToast } from "@/components/Toast";
 import Link from "next/link";
 import CopyField from "@/components/CopyField";
+import SpotlightCard from "@/components/SpotlightCard";
 
 interface LedgerActivity {
   id: number;
@@ -187,16 +188,20 @@ export default function WalletPage() {
         </p>
       </div>
 
-      {/* ── MoonPay Style Balance Cards with Tabular Numbers ── */}
+      {/* ── Animmaster Spotlight Balance Cards with Tabular Numbers ── */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
         {/* Available Balance */}
-        <div className="bg-surface border border-line rounded-[28px] p-6 sm:p-7 space-y-3 shadow-sm hover:border-[#7D00FF]/30 transition-all relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-[#7D00FF]/10 blur-3xl pointer-events-none rounded-full" />
+        <SpotlightCard
+          className="p-6 sm:p-7 space-y-3"
+          spotlightColor="rgba(124, 58, 237, 0.12)"
+          borderColor="rgba(167, 139, 250, 0.5)"
+        >
+          <div className="absolute top-0 right-0 w-32 h-32 bg-purple-500/10 blur-3xl pointer-events-none rounded-full" />
           <div className="flex items-center justify-between">
             <span className="text-xs uppercase tracking-wider text-muted font-bold">
               Available balance
             </span>
-            <span className="text-[11px] font-bold text-[#7D00FF] bg-purple-50 dark:bg-purple-950/40 px-2.5 py-0.5 rounded-full border border-purple-200/50 dark:border-purple-800/50">
+            <span className="text-[11px] font-bold text-purple-700 dark:text-purple-300 bg-purple-50 dark:bg-purple-950/40 px-2.5 py-0.5 rounded-full border border-purple-200/60 dark:border-purple-800/60">
               Ready to trade
             </span>
           </div>
@@ -204,34 +209,38 @@ export default function WalletPage() {
             <span className="text-4xl font-mono font-extrabold text-ink tabular-nums">
               {balances?.availableFormatted ?? "0.00"}
             </span>
-            <span className="text-xs font-mono font-bold text-muted">USDT</span>
+            <span className="text-xs font-mono font-bold text-purple-600 dark:text-purple-400">USDT</span>
           </div>
-          <p className="text-xs text-muted pt-2 border-t border-line">
+          <p className="text-xs text-muted pt-2 border-t border-purple-100 dark:border-purple-900/40">
             Available to place new sell ads, buy orders, or withdraw to an external wallet.
           </p>
-        </div>
+        </SpotlightCard>
 
         {/* In Escrow Balance */}
-        <div className="bg-surface border border-line rounded-[28px] p-6 sm:p-7 space-y-3 shadow-sm hover:border-amber/30 transition-all relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-amber/10 blur-3xl pointer-events-none rounded-full" />
+        <SpotlightCard
+          className="p-6 sm:p-7 space-y-3"
+          spotlightColor="rgba(245, 158, 11, 0.10)"
+          borderColor="rgba(251, 191, 36, 0.45)"
+        >
+          <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/10 blur-3xl pointer-events-none rounded-full" />
           <div className="flex items-center justify-between">
             <span className="text-xs uppercase tracking-wider text-muted font-bold">
               In escrow
             </span>
-            <span className="text-[11px] font-bold text-amber bg-amber-500/10 px-2.5 py-0.5 rounded-full border border-amber/30">
+            <span className="text-[11px] font-bold text-amber-700 dark:text-amber-400 bg-amber-500/10 px-2.5 py-0.5 rounded-full border border-amber-500/30">
               Active trades
             </span>
           </div>
           <div className="flex items-baseline gap-2">
-            <span className="text-4xl font-mono font-extrabold text-amber tabular-nums">
+            <span className="text-4xl font-mono font-extrabold text-amber-600 dark:text-amber-400 tabular-nums">
               {balances?.lockedFormatted ?? "0.00"}
             </span>
             <span className="text-xs font-mono font-bold text-muted">USDT</span>
           </div>
-          <p className="text-xs text-muted pt-2 border-t border-line">
+          <p className="text-xs text-muted pt-2 border-t border-amber-100 dark:border-amber-900/40">
             Locked in active P2P trades. Released immediately upon trade completion or cancelled.
           </p>
-        </div>
+        </SpotlightCard>
       </div>
 
       {/* ── MoonPay Style Action Nav Pill Switcher ── */}

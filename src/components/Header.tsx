@@ -8,15 +8,15 @@ import { useUser } from "@/context/UserContext";
 export default function Header() {
   const { currentUser, balances, users, currentUserId, setCurrentUserId } = useUser();
   const pathname = usePathname();
-  const [isDark, setIsDark] = useState(true);
+  const [isDark, setIsDark] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
 
   useEffect(() => {
     setMounted(true);
-    // Check initial dark mode
-    const isDarkStored = localStorage.getItem("nevora_theme") === "dark" ||
-      (!("nevora_theme" in localStorage) && window.matchMedia("(prefers-color-scheme: dark)").matches);
+    // Explicitly default to friendly white & purple theme (light mode)
+    const storedTheme = localStorage.getItem("nevora_theme");
+    const isDarkStored = storedTheme === "dark";
     setIsDark(isDarkStored);
     if (isDarkStored) {
       document.documentElement.classList.add("dark");
@@ -116,7 +116,7 @@ export default function Header() {
                 </span>
                 <span className="text-[10px] text-muted">USDT</span>
               </div>
-              {mounted && balances && balances.locked > 0 && (
+              {mounted && balances && parseFloat(balances.locked) > 0 && (
                 <>
                   <span className="text-line">|</span>
                   <div className="flex items-baseline gap-1.5">

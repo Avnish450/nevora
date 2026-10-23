@@ -6,6 +6,9 @@ import TradeCard from "@/components/TradeCard";
 import StepperCarousel from "@/components/StepperCarousel";
 import MarqueeRow from "@/components/MarqueeRow";
 import Accordion, { AccordionItem } from "@/components/Accordion";
+import SpotlightCard from "@/components/SpotlightCard";
+import ShimmerBadge from "@/components/ShimmerBadge";
+import AuroraBackground from "@/components/AuroraBackground";
 
 interface PreviewAd {
   id: number;
@@ -65,68 +68,72 @@ export default function HomePage() {
   return (
     <div className="space-y-16 sm:space-y-24 max-w-[1160px] mx-auto">
       {/* ═══════════════════════════════════════════════════════
-          HERO: MoonPay-style Headline & Live Checkout Widget
+          HERO: Animmaster Aurora Background + Headline & Widget
          ═══════════════════════════════════════════════════════ */}
-      <section className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-14 items-center pt-4 sm:pt-10">
-        {/* Left: MoonPay Bold Headline & Value Proposition */}
-        <div className="lg:col-span-7 space-y-6">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-purple-50 dark:bg-purple-950/40 border border-purple-200/60 dark:border-purple-800/40 text-xs font-semibold text-[#7D00FF] shadow-xs">
-            <span className="w-2 h-2 rounded-full bg-[#7D00FF] animate-pulse" />
-            <span>0% Trading Fees · Institutional Escrow Protection</span>
+      <AuroraBackground className="rounded-3xl p-4 sm:p-8 -mx-2 sm:-mx-6">
+        <section className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-14 items-center">
+          {/* Left: Friendly Headline & Value Proposition */}
+          <div className="lg:col-span-7 space-y-6">
+            <ShimmerBadge dotColor="bg-purple-600">
+              <span>0% Trading Fees · Bank-Grade Escrow Vault</span>
+            </ShimmerBadge>
+
+            <h1 className="text-4xl sm:text-6xl font-extrabold tracking-tight text-ink leading-[1.08] font-['Plus_Jakarta_Sans']">
+              Your safe bridge to{" "}
+              <span className="bg-gradient-to-r from-purple-600 via-violet-600 to-indigo-600 bg-clip-text text-transparent">
+                P2P crypto.
+              </span>
+            </h1>
+
+            <p className="text-base sm:text-xl text-muted leading-relaxed max-w-xl font-normal">
+              The simplest, friendliest way to buy and sell USDT with Indian Rupees. 
+              Funds stay locked in double-entry escrow until money arrives in your bank.
+            </p>
+
+            <div className="flex flex-col sm:flex-row gap-3 pt-2">
+              <Link
+                href="/marketplace"
+                className="px-8 py-4 rounded-full text-sm font-bold flex items-center justify-center gap-2 bg-gradient-to-r from-purple-600 via-violet-600 to-purple-700 text-white shadow-xl shadow-purple-600/30 hover:shadow-2xl hover:shadow-purple-600/40 hover:-translate-y-0.5 active:scale-[0.98] transition-all relative overflow-hidden group"
+              >
+                <span className="absolute inset-0 block h-full w-full bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-[150%] group-hover:translate-x-[250%] duration-1000 transition-transform pointer-events-none" />
+                <span className="relative z-10 flex items-center gap-2">
+                  <span>Explore Marketplace</span>
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                  </svg>
+                </span>
+              </Link>
+              <a
+                href="#how-it-works"
+                className="inline-flex items-center justify-center px-6 py-4 rounded-full border border-purple-200/80 dark:border-purple-800/60 bg-white/80 dark:bg-purple-950/20 text-sm font-semibold text-ink hover:bg-purple-50 dark:hover:bg-purple-900/30 transition-all shadow-xs"
+              >
+                How Escrow Works
+              </a>
+            </div>
+
+            {/* Trust Guarantees */}
+            <div className="pt-2 flex flex-wrap items-center gap-6 text-xs text-muted font-medium">
+              <span className="flex items-center gap-2">
+                <span className="w-4 h-4 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-bold text-[10px]">✓</span>
+                <span>Direct Bank & UPI Settlement</span>
+              </span>
+              <span className="flex items-center gap-2">
+                <span className="w-4 h-4 rounded-full bg-purple-500/15 text-purple-600 dark:text-purple-400 flex items-center justify-center font-bold text-[10px]">✓</span>
+                <span>Double-Entry Ledger</span>
+              </span>
+              <span className="flex items-center gap-2">
+                <span className="w-4 h-4 rounded-full bg-amber-500/15 text-amber-600 dark:text-amber-400 flex items-center justify-center font-bold text-[10px]">✓</span>
+                <span>Zero Counterparty Risk</span>
+              </span>
+            </div>
           </div>
 
-          <h1 className="text-4xl sm:text-6xl font-extrabold tracking-tight text-ink leading-[1.08] font-['Plus_Jakarta_Sans']">
-            Your passport to{" "}
-            <span className="bg-gradient-to-r from-[#7D00FF] via-[#9E47FF] to-[#C084FC] bg-clip-text text-transparent">
-              P2P crypto.
-            </span>
-          </h1>
-
-          <p className="text-base sm:text-xl text-muted leading-relaxed max-w-xl font-normal">
-            The simplest, safest way to buy and sell USDT with Indian Rupees. 
-            Funds stay locked in smart escrow until payment hits your bank account.
-          </p>
-
-          <div className="flex flex-col sm:flex-row gap-3 pt-2">
-            <Link
-              href="/marketplace"
-              className="btn-moonpay px-8 py-4 text-sm font-bold flex items-center justify-center gap-2 shadow-xl shadow-purple-500/25 active:scale-[0.98] transition-all"
-            >
-              <span>Explore Marketplace</span>
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-              </svg>
-            </Link>
-            <a
-              href="#how-it-works"
-              className="inline-flex items-center justify-center px-6 py-4 rounded-full border border-line bg-surface text-sm font-semibold text-ink hover:bg-surface-subtle transition-all"
-            >
-              How Escrow Works
-            </a>
+          {/* Right: Live Interactive Trade Widget */}
+          <div className="lg:col-span-5 flex justify-center lg:justify-end">
+            <TradeCard />
           </div>
-
-          {/* Trust Guarantees */}
-          <div className="pt-2 flex flex-wrap items-center gap-6 text-xs text-muted font-medium">
-            <span className="flex items-center gap-2">
-              <span className="w-4 h-4 rounded-full bg-[#00C278]/15 text-[#00C278] flex items-center justify-center font-bold text-[10px]">✓</span>
-              <span>Direct Bank & UPI Settlement</span>
-            </span>
-            <span className="flex items-center gap-2">
-              <span className="w-4 h-4 rounded-full bg-[#7D00FF]/15 text-[#7D00FF] flex items-center justify-center font-bold text-[10px]">✓</span>
-              <span>Double-Entry Ledger</span>
-            </span>
-            <span className="flex items-center gap-2">
-              <span className="w-4 h-4 rounded-full bg-amber-500/15 text-amber-500 flex items-center justify-center font-bold text-[10px]">✓</span>
-              <span>Zero Counterparty Risk</span>
-            </span>
-          </div>
-        </div>
-
-        {/* Right: Live Interactive MoonPay Widget */}
-        <div className="lg:col-span-5 flex justify-center lg:justify-end">
-          <TradeCard />
-        </div>
-      </section>
+        </section>
+      </AuroraBackground>
 
       {/* ═══════════════════════════════════════════════════════
           TRUST STRIP: MoonPay Style Metrics
@@ -175,11 +182,11 @@ export default function HomePage() {
       </section>
 
       {/* ═══════════════════════════════════════════════════════
-          ESCROW EXPLAINER: MoonPay Style 3-Box Architecture
+          ESCROW EXPLAINER: Animmaster 3-Box Architecture with Spotlight
          ═══════════════════════════════════════════════════════ */}
-      <section className="bg-surface border border-line rounded-[28px] p-6 sm:p-10 space-y-8 shadow-sm">
+      <section className="bg-white/80 dark:bg-[#120E22]/80 border border-purple-100/90 dark:border-purple-900/50 rounded-[32px] p-6 sm:p-10 space-y-8 shadow-sm backdrop-blur-xs">
         <div className="space-y-2 text-center sm:text-left">
-          <span className="text-xs uppercase tracking-wider text-[#7D00FF] font-mono font-bold">
+          <span className="text-xs uppercase tracking-wider text-purple-600 dark:text-purple-400 font-mono font-bold">
             Security Architecture
           </span>
           <h3 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-ink font-['Plus_Jakarta_Sans']">
@@ -190,37 +197,49 @@ export default function HomePage() {
           </p>
         </div>
 
-        {/* Visual Escrow Flow Diagram */}
+        {/* Visual Escrow Flow Diagram with Animmaster Spotlight Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-          <div className="p-6 rounded-2xl bg-surface-subtle border border-line space-y-3 relative group hover:border-[#7D00FF]/40 transition-colors">
-            <div className="w-10 h-10 rounded-full bg-purple-50 dark:bg-purple-950/50 border border-purple-200/50 dark:border-purple-800/50 flex items-center justify-center font-mono text-sm font-bold text-[#7D00FF]">
+          <SpotlightCard
+            className="p-6 space-y-3"
+            spotlightColor="rgba(124, 58, 237, 0.12)"
+            borderColor="rgba(167, 139, 250, 0.5)"
+          >
+            <div className="w-10 h-10 rounded-2xl bg-purple-50 dark:bg-purple-950/50 border border-purple-200/80 dark:border-purple-800/60 flex items-center justify-center font-mono text-sm font-bold text-purple-600 dark:text-purple-400 shadow-xs">
               01
             </div>
             <h4 className="text-base font-bold text-ink">Seller locks USDT</h4>
             <p className="text-xs text-muted leading-relaxed">
               When an order is created, the seller&apos;s USDT moves instantly from available balance into locked platform escrow.
             </p>
-          </div>
+          </SpotlightCard>
 
-          <div className="p-6 rounded-2xl bg-surface-subtle border border-line space-y-3 relative group hover:border-[#7D00FF]/40 transition-colors">
-            <div className="w-10 h-10 rounded-full bg-purple-50 dark:bg-purple-950/50 border border-purple-200/50 dark:border-purple-800/50 flex items-center justify-center font-mono text-sm font-bold text-[#7D00FF]">
+          <SpotlightCard
+            className="p-6 space-y-3"
+            spotlightColor="rgba(124, 58, 237, 0.12)"
+            borderColor="rgba(167, 139, 250, 0.5)"
+          >
+            <div className="w-10 h-10 rounded-2xl bg-purple-50 dark:bg-purple-950/50 border border-purple-200/80 dark:border-purple-800/60 flex items-center justify-center font-mono text-sm font-bold text-purple-600 dark:text-purple-400 shadow-xs">
               02
             </div>
             <h4 className="text-base font-bold text-ink">Buyer transfers INR</h4>
             <p className="text-xs text-muted leading-relaxed">
               The buyer pays the seller directly via UPI or IMPS. No bank intermediary or platform fee is deducted.
             </p>
-          </div>
+          </SpotlightCard>
 
-          <div className="p-6 rounded-2xl bg-surface-subtle border border-line space-y-3 relative group hover:border-[#7D00FF]/40 transition-colors">
-            <div className="w-10 h-10 rounded-full bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200/50 dark:border-emerald-800/50 flex items-center justify-center font-mono text-sm font-bold text-[#00C278]">
+          <SpotlightCard
+            className="p-6 space-y-3"
+            spotlightColor="rgba(16, 185, 129, 0.10)"
+            borderColor="rgba(52, 211, 153, 0.45)"
+          >
+            <div className="w-10 h-10 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200/80 dark:border-emerald-800/60 flex items-center justify-center font-mono text-sm font-bold text-emerald-600 dark:text-emerald-400 shadow-xs">
               03
             </div>
             <h4 className="text-base font-bold text-ink">Instant Release</h4>
             <p className="text-xs text-muted leading-relaxed">
               Once payment is received, seller releases the trade. The escrow unlocks and deposits USDT directly to the buyer.
             </p>
-          </div>
+          </SpotlightCard>
         </div>
       </section>
 

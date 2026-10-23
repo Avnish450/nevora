@@ -12,28 +12,28 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 :root {
-  /* MoonPay Design System — Light Mode */
-  --ink: #0E0D17;
-  --paper: #FAFAFC;
+  /* Nevora Friendly White & Purple Theme — Light Mode (Default) */
+  --ink: #171126;
+  --paper: #FAF8FF;
   --surface: #FFFFFF;
-  --surface-subtle: #F4F3F8;
-  --line: #E8E6F0;
-  --muted: #6B697D;
+  --surface-subtle: #F5F3FF;
+  --line: #EDE9FE;
+  --muted: #685F7B;
 
-  /* MoonPay Signature Electric Violet (#7D00FF) */
-  --primary: #7D00FF;
-  --primary-hover: #6A00DB;
-  --primary-subtle: #F4ECFF;
-  --primary-glow: rgba(125, 0, 255, 0.25);
+  /* Signature Vibrant Royal Purple */
+  --primary: #7C3AED;
+  --primary-hover: #6D28D9;
+  --primary-subtle: #EDE9FE;
+  --primary-glow: rgba(124, 58, 237, 0.22);
   
-  /* Retain token names for compatibility while applying MoonPay palette */
-  --moss: #7D00FF;
-  --moss-hover: #6A00DB;
+  /* Retain token names for compatibility while applying friendly palette */
+  --moss: #7C3AED;
+  --moss-hover: #6D28D9;
   --moss-text: #FFFFFF;
-  --buy: #00C278;
-  --sell: #FF4365;
-  --amber: #F59E0B;
-  --alert: #EF4444;
+  --buy: #059669;
+  --sell: #E11D48;
+  --amber: #D97706;
+  --alert: #DC2626;
 
   --color-ink: var(--ink);
   --color-paper: var(--paper);
@@ -47,9 +47,9 @@ h1, h2, h3, h4, h5, h6 {
   --color-amber: var(--amber);
   --color-alert: var(--alert);
 
-  /* MoonPay Generous Curves */
-  --radius-input: 12px;
-  --radius-card: 20px;
+  /* Friendly Generous Curves */
+  --radius-input: 14px;
+  --radius-card: 24px;
   --radius-pill: 9999px;
 
   /* Motion variables */
@@ -62,50 +62,26 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .dark {
-  /* MoonPay Design System — Midnight Obsidian / Dark Mode */
-  --ink: #F8F7FC;
-  --paper: #08060F;
-  --surface: #120E22;
-  --surface-subtle: #191330;
-  --line: #241D3B;
-  --muted: #9E9BB3;
+  /* Rich Deep Obsidian & Violet — Dark Mode */
+  --ink: #FAF5FF;
+  --paper: #0D0818;
+  --surface: #151024;
+  --surface-subtle: #1F1735;
+  --line: #2C2248;
+  --muted: #A39BB5;
 
-  --primary: #8F24FF;
-  --primary-hover: #7D00FF;
-  --primary-subtle: rgba(125, 0, 255, 0.18);
-  --primary-glow: rgba(143, 36, 255, 0.35);
+  --primary: #8B5CF6;
+  --primary-hover: #7C3AED;
+  --primary-subtle: rgba(139, 92, 246, 0.20);
+  --primary-glow: rgba(139, 92, 246, 0.35);
 
-  --moss: #8F24FF;
-  --moss-hover: #7D00FF;
+  --moss: #8B5CF6;
+  --moss-hover: #7C3AED;
   --moss-text: #FFFFFF;
   --buy: #10B981;
-  --sell: #FF5A78;
+  --sell: #F43F5E;
   --amber: #FBBF24;
   --alert: #F87171;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root:not(.light) {
-    --ink: #F8F7FC;
-    --paper: #08060F;
-    --surface: #120E22;
-    --surface-subtle: #191330;
-    --line: #241D3B;
-    --muted: #9E9BB3;
-
-    --primary: #8F24FF;
-    --primary-hover: #7D00FF;
-    --primary-subtle: rgba(125, 0, 255, 0.18);
-    --primary-glow: rgba(143, 36, 255, 0.35);
-
-    --moss: #8F24FF;
-    --moss-hover: #7D00FF;
-    --moss-text: #FFFFFF;
-    --buy: #10B981;
-    --sell: #FF5A78;
-    --amber: #FBBF24;
-    --alert: #F87171;
-  }
 }
 
 body {
@@ -115,12 +91,34 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   background-image: 
-    radial-gradient(ellipse 80% 50% at 50% -20%, rgba(125, 0, 255, 0.08), transparent 70%);
+    radial-gradient(ellipse 90% 60% at 50% -15%, rgba(124, 58, 237, 0.08), transparent 75%),
+    radial-gradient(ellipse 70% 40% at 100% 50%, rgba(192, 132, 252, 0.06), transparent 60%);
 }
 
 .dark body, body.dark {
   background-image: 
-    radial-gradient(ellipse 80% 50% at 50% -20%, rgba(125, 0, 255, 0.15), transparent 70%);
+    radial-gradient(ellipse 80% 50% at 50% -20%, rgba(139, 92, 246, 0.16), transparent 70%);
+}
+
+/* Animmaster Lib Animations */
+@keyframes shimmer-sweep {
+  0% { transform: translateX(-150%) rotate(15deg); }
+  35%, 100% { transform: translateX(250%) rotate(15deg); }
+}
+
+@keyframes aurora-float {
+  0% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(30px, -20px) scale(1.08); }
+  100% { transform: translate(-25px, 25px) scale(0.95); }
+}
+
+@keyframes border-beam {
+  100% { offset-distance: 100%; }
+}
+
+@keyframes pulse-subtle {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.85; transform: scale(1.02); }
 }
 
 /* Monospace numerals with tabular alignment */

@@ -3,6 +3,8 @@
 import React, { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import { formatIndianInr, formatUsdtDisplayString } from "@/lib/tokens";
+import SpotlightCard from "@/components/SpotlightCard";
+import ShimmerButton from "@/components/ShimmerButton";
 
 interface Ad {
   id: number;
@@ -81,17 +83,21 @@ export default function TradeCard() {
   }, [inrAmount, rateInr]);
 
   return (
-    <div className="bg-surface border border-line rounded-[28px] p-6 sm:p-7 shadow-2xl shadow-purple-500/10 space-y-5 max-w-[420px] w-full backdrop-blur-md relative overflow-hidden">
+    <SpotlightCard
+      className="p-6 sm:p-7 shadow-xl shadow-purple-500/10 space-y-5 max-w-[420px] w-full border-purple-200/70 dark:border-purple-900/50"
+      spotlightColor="rgba(124, 58, 237, 0.12)"
+      borderColor="rgba(147, 51, 234, 0.35)"
+    >
       {/* Subtle top ambient glow */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-48 h-12 bg-[#7D00FF]/15 blur-2xl pointer-events-none rounded-full" />
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-48 h-12 bg-purple-500/15 blur-2xl pointer-events-none rounded-full" />
 
       {/* Buy / Sell Sliding Segmented Toggle */}
-      <div className="p-1 bg-surface-subtle border border-line rounded-full flex relative">
+      <div className="p-1 bg-purple-50 dark:bg-purple-950/40 border border-purple-200/80 dark:border-purple-800/60 rounded-full flex relative">
         <button
           type="button"
           onClick={() => setTab("buy")}
           className={`flex-1 py-2 text-xs font-bold rounded-full transition-all relative z-10 ${
-            tab === "buy" ? "text-white" : "text-muted hover:text-ink"
+            tab === "buy" ? "text-white" : "text-purple-900 dark:text-purple-300 hover:text-purple-700"
           }`}
         >
           Buy USDT
@@ -100,14 +106,14 @@ export default function TradeCard() {
           type="button"
           onClick={() => setTab("sell")}
           className={`flex-1 py-2 text-xs font-bold rounded-full transition-all relative z-10 ${
-            tab === "sell" ? "text-white" : "text-muted hover:text-ink"
+            tab === "sell" ? "text-white" : "text-purple-900 dark:text-purple-300 hover:text-purple-700"
           }`}
         >
           Sell USDT
         </button>
-        {/* Sliding active pill (200ms) with MoonPay purple */}
+        {/* Sliding active pill (200ms) with Animmaster purple */}
         <div
-          className="absolute top-1 bottom-1 w-[calc(50%-4px)] bg-[#7D00FF] rounded-full shadow-md shadow-purple-500/30 transition-transform duration-200"
+          className="absolute top-1 bottom-1 w-[calc(50%-4px)] bg-gradient-to-r from-purple-600 to-violet-600 rounded-full shadow-md shadow-purple-500/30 transition-transform duration-200"
           style={{
             transform: tab === "buy" ? "translateX(0)" : "translateX(100%)",
           }}
@@ -247,24 +253,27 @@ export default function TradeCard() {
         </div>
       </div>
 
-      {/* MoonPay Signature CTA Button */}
+      {/* Animmaster Shimmer CTA Button */}
       <Link
         href={`/marketplace`}
-        className="w-full flex items-center justify-center gap-2 py-3.5 rounded-full btn-moonpay text-sm font-bold tracking-wide shadow-lg shadow-purple-500/25 active:scale-[0.98] transition-all"
+        className="w-full flex items-center justify-center gap-2 py-3.5 rounded-full bg-gradient-to-r from-purple-600 via-violet-600 to-purple-700 text-white font-bold text-sm tracking-wide shadow-lg shadow-purple-600/30 hover:shadow-xl hover:shadow-purple-600/40 hover:-translate-y-0.5 active:scale-[0.98] transition-all relative overflow-hidden group"
       >
-        <span>{tab === "buy" ? "Continue to Buy USDT" : "Continue to Sell USDT"}</span>
-        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-        </svg>
+        <span className="absolute inset-0 block h-full w-full bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-[150%] group-hover:translate-x-[250%] duration-1000 transition-transform pointer-events-none" />
+        <span className="relative z-10 flex items-center gap-2">
+          <span>{tab === "buy" ? "Continue to Buy USDT" : "Continue to Sell USDT"}</span>
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+          </svg>
+        </span>
       </Link>
 
-      {/* MoonPay Trust Guarantee */}
+      {/* Trust Guarantee */}
       <div className="flex items-center justify-center gap-2 text-[11px] text-muted text-center pt-0.5">
-        <svg className="w-3.5 h-3.5 text-[#00C278]" viewBox="0 0 20 20" fill="currentColor">
+        <svg className="w-3.5 h-3.5 text-emerald-500" viewBox="0 0 20 20" fill="currentColor">
           <path fillRule="evenodd" d="M10 1.944A11.954 11.954 0 012.166 5C2.056 5.649 2 6.319 2 7c0 5.225 3.34 9.67 8 11.317C14.66 16.67 18 12.225 18 7c0-.682-.057-1.35-.166-2.001A11.954 11.954 0 0110 1.944zm3.707 6.763a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
         </svg>
-        <span>Protected by double-entry escrow · Instant release</span>
+        <span>Protected by platform escrow · Instant settlement</span>
       </div>
-    </div>
+    </SpotlightCard>
   );
 }
