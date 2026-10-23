@@ -10,6 +10,7 @@ export default function Header() {
   const pathname = usePathname();
   const [isDark, setIsDark] = useState(true);
   const [mounted, setMounted] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -22,6 +23,13 @@ export default function Header() {
     } else {
       document.documentElement.classList.remove("dark");
     }
+
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 8);
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   const toggleTheme = () => {
@@ -49,7 +57,13 @@ export default function Header() {
   }
 
   return (
-    <header className="bg-surface border-b border-line sticky top-0 z-40 transition-colors">
+    <header
+      className={`sticky top-0 z-40 transition-all duration-150 ${
+        isScrolled
+          ? "bg-surface/95 border-b border-line shadow-xs backdrop-blur-xs"
+          : "bg-surface border-b border-transparent"
+      }`}
+    >
       <div className="max-w-[1180px] mx-auto px-4 sm:px-6">
         <div className="flex items-center justify-between h-14">
           {/* Brand Wordmark & Nav */}
