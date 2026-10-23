@@ -3,6 +3,10 @@
 import React, { useState, useEffect, useCallback, use } from "react";
 import { useUser } from "@/context/UserContext";
 import Link from "next/link";
+import StepTracker from "@/components/StepTracker";
+import AnimatedPadlock from "@/components/AnimatedPadlock";
+import AnimatedCheckmark from "@/components/AnimatedCheckmark";
+import CopyField from "@/components/CopyField";
 
 interface OrderDetail {
   id: number;
@@ -74,11 +78,11 @@ export default function OrderDetailPage({
   const [showDisputeModal, setShowDisputeModal] = useState(false);
   const [disputeReason, setDisputeReason] = useState("");
   const [mobileTab, setMobileTab] = useState<"trade" | "chat">("trade");
-  const [copiedField, setCopiedField] = useState<string | null>(null);
 
   // Countdown timer
   const [timeLeft, setTimeLeft] = useState<string>("");
   const [isUrgent, setIsUrgent] = useState<boolean>(false);
+  const [underFiveMin, setUnderFiveMin] = useState<boolean>(false);
 
   const fetchOrderData = useCallback(async () => {
     try {
@@ -121,11 +125,12 @@ export default function OrderDetailPage({
     return () => clearInterval(interval);
   }, [fetchOrderData, fetchMessages]);
 
-  // Countdown timer logic
+  // Countdown timer logic with amber and gentle pulse
   useEffect(() => {
     if (!order || order.state !== "CREATED") {
       setTimeLeft("");
       setIsUrgent(false);
+      setUnderFiveMin(false);
       return;
     }
 
@@ -137,12 +142,14 @@ export default function OrderDetailPage({
       if (diff <= 0) {
         setTimeLeft("00:00");
         setIsUrgent(true);
+        setUnderFiveMin(true);
         fetchOrderData();
       } else {
         const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
         const secs = Math.floor((diff % (1000 * 60)) / 1000);
         setTimeLeft(`${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`);
-        setIsUrgent(diff < 2 * 60 * 1000); // Amber in last 2 minutes
+        setUnderFiveMin(diff < 5 * 60 * 1000);
+        setIsUrgent(diff < 2 * 60 * 1000); // Gentle pulse in last 2 minutes
       }
     };
 
@@ -150,12 +157,6 @@ export default function OrderDetailPage({
     const timer = setInterval(updateCountdown, 1000);
     return () => clearInterval(timer);
   }, [order, fetchOrderData]);
-
-  const copyToClipboard = (text: string, field: string) => {
-    navigator.clipboard.writeText(text);
-    setCopiedField(field);
-    setTimeout(() => setCopiedField(null), 2000);
-  };
 
   const handleMarkPaid = async () => {
     try {
@@ -192,7 +193,7 @@ export default function OrderDetailPage({
   };
 
   const handleCancel = async () => {
-    if (!confirm("Cancel this trade? The seller's locked USDT will be returned to their available balance.")) {
+    if (!confirm("Cancel this trade? The seller's locked USDT will immediately return to their available balance.")) {
       return;
     }
     try {
@@ -281,43 +282,29 @@ export default function OrderDetailPage({
   const isSeller = currentUser?.id === order.sellerId;
   const isAdmin = currentUser?.role === "admin";
 
-  // Step Tracker indices:
-  // Step 1: Order placed (CREATED)
-  // Step 2: Pay seller (PAID)
-  // Step 3: Seller confirms (RELEASED or terminal)
-  // Step 4: Complete
-  const getStepIndex = (state: string) => {
-    switch (state) {
-      case "CREATED":
-        return 1;
-      case "PAID":
-        return 2;
-      case "RELEASED":
-      case "RESOLVED_RELEASED":
-      case "RESOLVED_REFUNDED":
-        return 4;
-      case "DISPUTED":
-        return 2;
-      default:
-        return 0; // Cancelled / Expired
-    }
-  };
+  const isLocked = order.state === "CREATED" || order.state === "PAID" || order.state === "DISPUTED";
+  const isCompleted = order.state === "RELEASED" || order.state === "RESOLVED_RELEASED" || order.state === "RESOLVED_REFUNDED";
+  const isTerminalCancelled = order.state === "CANCELLED" || order.state === "EXPIRED";
 
-  const currentStep = getStepIndex(order.state);
-  const steps = [
-    { num: 1, label: "Order placed" },
-    { num: 2, label: "Pay seller" },
-    { num: 3, label: "Seller confirms" },
-    { num: 4, label: "Complete" },
+  // Step tracker state
+  let currentStepIndex = 0;
+  if (order.state === "CREATED") currentStepIndex = 0;
+  else if (order.state === "PAID" || order.state === "DISPUTED") currentStepIndex = 1;
+  else if (isCompleted) currentStepIndex = 2;
+
+  const STEPS = [
+    { id: "lock", label: "USDT Locked", description: "In platform escrow" },
+    { id: "pay", label: "INR Transferred", description: "Direct UPI/Bank" },
+    { id: "release", label: "USDT Released", description: "To buyer wallet" },
   ];
 
   return (
     <div className="max-w-[1020px] mx-auto space-y-6">
       {/* ── Top Bar: Trade ID & Step Tracker ── */}
-      <div className="bg-surface border border-line rounded-card p-4 sm:p-6 space-y-6">
+      <div className="bg-surface border border-line rounded-card p-4 sm:p-6 space-y-4 shadow-xs">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-line pb-4">
-          <div className="flex items-baseline gap-3">
-            <span className="text-xs uppercase tracking-wider text-muted font-semibold">
+          <div className="flex items-center gap-3">
+            <span className="text-xs uppercase tracking-wider text-muted font-mono font-semibold">
               Trade #{order.id}
             </span>
             <span className="text-xs text-muted">
@@ -326,57 +313,36 @@ export default function OrderDetailPage({
               ) : isSeller ? (
                 <>Selling to <strong className="text-ink font-medium">{order.buyerName}</strong></>
               ) : (
-                <>Between {order.buyerName} and {order.sellerName}</>
+                <>{order.buyerName} &harr; {order.sellerName}</>
               )}
             </span>
           </div>
 
-          {/* Time Countdown (only appears when time matters) */}
+          {/* Time Countdown (ticks every sec, amber < 5m, gentle pulse < 2m) */}
           {timeLeft && order.state === "CREATED" && (
             <div
-              className={`flex items-center gap-2 px-3 py-1 rounded-input border text-xs font-mono tabular-nums ${
+              className={`flex items-center gap-2 px-3 py-1.5 rounded-input border text-xs font-mono tabular-nums ${
                 isUrgent
-                  ? "bg-amber/10 border-amber/30 text-amber"
-                  : "bg-paper border-line text-ink"
+                  ? "bg-amber/15 border-amber/40 text-amber animate-gentle-pulse font-bold"
+                  : underFiveMin
+                  ? "bg-amber/10 border-amber/30 text-amber font-semibold"
+                  : "bg-paper border-line text-ink font-medium"
               }`}
             >
               <span className="text-[11px] font-sans font-medium text-muted">Pay within</span>
-              <span className="font-semibold">{timeLeft}</span>
+              <span>{timeLeft}</span>
             </div>
           )}
         </div>
 
-        {/* 4-Step Tracker */}
-        <div className="grid grid-cols-4 gap-2 relative">
-          {steps.map((s) => {
-            const isCompleted = currentStep > s.num || currentStep === 4;
-            const isCurrent = currentStep === s.num && currentStep !== 4;
-            return (
-              <div key={s.num} className="flex flex-col gap-1.5">
-                <div
-                  className={`h-1.5 rounded-full transition-colors ${
-                    isCompleted
-                      ? "bg-moss"
-                      : isCurrent
-                      ? "bg-amber"
-                      : "bg-line"
-                  }`}
-                />
-                <span
-                  className={`text-[11px] sm:text-xs font-medium truncate ${
-                    isCurrent
-                      ? "text-ink font-semibold"
-                      : isCompleted
-                      ? "text-moss"
-                      : "text-muted"
-                  }`}
-                >
-                  {s.label}
-                </span>
-              </div>
-            );
-          })}
-        </div>
+        {/* 3-Step Animated Tracker */}
+        <StepTracker
+          steps={STEPS}
+          currentStepIndex={currentStepIndex}
+          isDisputed={order.state === "DISPUTED"}
+          isCancelled={order.state === "CANCELLED"}
+          isExpired={order.state === "EXPIRED"}
+        />
       </div>
 
       {/* Mobile Tab Toggle */}
@@ -399,279 +365,210 @@ export default function OrderDetailPage({
         </button>
       </div>
 
-      {/* Error alert if any */}
-      {error && (
-        <div className="p-3 bg-paper border border-alert/30 rounded-input text-xs text-alert flex items-start justify-between">
-          <span>{error}</span>
-          <button onClick={() => setError(null)} className="text-muted hover:text-ink ml-2">
-            ✕
-          </button>
-        </div>
-      )}
+      {/* ── Main Two-Column Layout ── */}
+      <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-start">
+        {/* Left Column: Trade Details & Actions */}
+        <div className={`md:col-span-7 space-y-6 ${mobileTab === "chat" ? "hidden md:block" : "block"}`}>
+          {/* Summary Card with Signature Padlock */}
+          <div className="bg-surface border border-line rounded-card p-6 space-y-5 shadow-xs">
+            <div className="flex items-center justify-between border-b border-line pb-4">
+              <div className="space-y-1">
+                <span className="text-[11px] uppercase tracking-wider text-muted font-medium">
+                  Escrow Settlement Status
+                </span>
+                <div className="flex items-center gap-2">
+                  <h2 className="text-xl font-bold tracking-tight text-ink">
+                    {order.state === "CREATED" && "Awaiting INR payment"}
+                    {order.state === "PAID" && "Payment marked — awaiting seller release"}
+                    {order.state === "RELEASED" && "Trade completed successfully"}
+                    {order.state === "DISPUTED" && "Trade in arbitration dispute"}
+                    {order.state === "CANCELLED" && "Trade cancelled"}
+                    {order.state === "EXPIRED" && "Trade expired"}
+                  </h2>
+                </div>
+              </div>
 
-      {/* ── Core Two-Column Layout ── */}
-      <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
-        {/* Left Column: Trade Summary, Actions, Payment Info, Timeline */}
-        <div className={`md:col-span-7 space-y-6 ${mobileTab === "chat" ? "hidden md:block" : ""}`}>
-          {/* Plain Summary & Primary Action Card */}
-          <div className="bg-surface border border-line rounded-card p-5 sm:p-6 space-y-6">
-            <div>
-              <p className="text-xs uppercase tracking-wider text-muted font-semibold">
-                Summary
-              </p>
-              <p className="text-base sm:text-lg text-ink font-medium mt-1">
-                {isBuyer ? "You are buying " : "You are selling "}
-                <span className="font-mono font-semibold text-ink tabular-nums">
-                  {order.usdtAmountFormatted} USDT
-                </span>{" "}
-                for{" "}
-                <span className="font-mono font-semibold text-ink tabular-nums">
+              {/* Signature Escrow Padlock or Success Checkmark */}
+              {isCompleted ? (
+                <AnimatedCheckmark size={32} />
+              ) : (
+                <AnimatedPadlock isLocked={isLocked} size={28} />
+              )}
+            </div>
+
+            {/* Financial Numbers with Tabular Alignment */}
+            <div className="grid grid-cols-2 gap-4 p-4 rounded-input bg-paper border border-line">
+              <div className="space-y-1">
+                <span className="text-[11px] text-muted block">You Receive / Transfer</span>
+                <div className="font-mono text-2xl font-bold text-ink tabular-nums">
+                  {order.usdtAmountFormatted}{" "}
+                  <span className="text-xs text-moss font-sans">USDT</span>
+                </div>
+              </div>
+              <div className="space-y-1 text-right">
+                <span className="text-[11px] text-muted block">Total INR Amount</span>
+                <div className="font-mono text-2xl font-bold text-ink tabular-nums">
                   ₹{order.totalInrFormatted}
+                </div>
+                <span className="text-[10px] text-muted font-mono block">
+                  @ ₹{order.priceInrFormatted} / USDT
                 </span>
-              </p>
-              <p className="text-xs text-muted font-mono mt-0.5 tabular-nums">
-                Rate: ₹{order.priceInrFormatted} per USDT
-              </p>
+              </div>
             </div>
 
-            {/* Escrow Status Statement */}
-            <div className="bg-paper border border-line rounded-input p-3.5 text-xs text-muted leading-relaxed">
-              <strong className="text-ink font-semibold">Escrow protected:</strong>{" "}
-              {order.state === "CREATED" && (
-                <>
-                  {order.usdtAmountFormatted} USDT is held safely in platform escrow. The seller cannot withdraw it while this trade is active.
-                </>
-              )}
-              {order.state === "PAID" && (
-                <>
-                  Payment reported. The seller has been instructed to check their account and release your {order.usdtAmountFormatted} USDT.
-                </>
-              )}
-              {order.state === "RELEASED" && (
-                <span className="text-buy font-medium">
-                  Trade completed. {order.usdtAmountFormatted} USDT was deposited directly into the buyer&apos;s available wallet.
-                </span>
-              )}
-              {order.state === "CANCELLED" && (
-                <span>Trade cancelled. The seller&apos;s USDT has been returned to their balance.</span>
-              )}
-              {order.state === "EXPIRED" && (
-                <span>Trade expired. Payment deadline passed; USDT unlocked back to seller.</span>
-              )}
-              {order.state === "DISPUTED" && (
-                <span className="text-alert font-medium">
-                  Disputed: &quot;{dispute?.reason}&quot;. Funds remain locked until Admin investigation concludes.
-                </span>
-              )}
-              {order.state === "RESOLVED_RELEASED" && (
-                <span className="text-buy font-medium">
-                  Dispute resolved by Admin. Funds released to buyer.
-                </span>
-              )}
-              {order.state === "RESOLVED_REFUNDED" && (
-                <span className="text-sell font-medium">
-                  Dispute resolved by Admin. Funds refunded back to seller.
-                </span>
-              )}
+            {/* Escrow Guarantee Status Bar */}
+            <div className="flex items-center gap-2 p-3 rounded-input bg-paper/60 border border-line text-xs text-muted">
+              <span className="w-2 h-2 rounded-full bg-buy" />
+              <span>
+                {isLocked
+                  ? "100% of USDT is currently held in platform escrow."
+                  : isCompleted
+                  ? "USDT has been credited to the buyer's wallet balance."
+                  : "USDT has been unlocked and returned to the seller."}
+              </span>
             </div>
 
-            {/* ── Seller's Payment Details (Copyable) ── */}
+            {/* Payment Details with Copy Fields */}
             {ad && (
               <div className="space-y-3 pt-2 border-t border-line">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs uppercase tracking-wider text-muted font-semibold">
-                    Seller payment details
-                  </span>
-                  <span className="text-xs text-muted font-medium">
-                    Method: <strong className="text-ink">{ad.paymentMethod}</strong>
-                  </span>
-                </div>
-
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between p-2.5 bg-paper border border-line rounded-input text-xs">
-                    <div>
-                      <span className="text-[10px] text-muted uppercase block">Account / UPI ID</span>
-                      <span className="font-mono text-ink font-medium select-all">
-                        {ad.paymentDetails}
-                      </span>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => copyToClipboard(ad.paymentDetails, "upi")}
-                      className="px-2 py-1 rounded-input text-xs border border-line bg-surface text-muted hover:text-ink"
-                    >
-                      {copiedField === "upi" ? "Copied" : "Copy"}
-                    </button>
-                  </div>
-
-                  <div className="flex items-center justify-between p-2.5 bg-paper border border-line rounded-input text-xs">
-                    <div>
-                      <span className="text-[10px] text-muted uppercase block">Exact Amount to Transfer</span>
-                      <span className="font-mono text-ink font-semibold tabular-nums">
-                        ₹{order.totalInrFormatted}
-                      </span>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => copyToClipboard(order.totalInrFormatted.replace(/,/g, ""), "amount")}
-                      className="px-2 py-1 rounded-input text-xs border border-line bg-surface text-muted hover:text-ink"
-                    >
-                      {copiedField === "amount" ? "Copied" : "Copy"}
-                    </button>
-                  </div>
-                </div>
+                <h3 className="text-xs uppercase tracking-wider text-muted font-semibold">
+                  Seller Payment Details ({ad.paymentMethod})
+                </h3>
+                <CopyField
+                  label="Payment Account / UPI VPA"
+                  value={ad.paymentDetails}
+                />
+                <CopyField
+                  label="Exact INR Amount"
+                  value={order.totalInrFormatted.replace(/,/g, "")}
+                  displayValue={`₹${order.totalInrFormatted}`}
+                />
               </div>
             )}
 
-            {/* ── One Primary Action + Safety Copy Beside It ── */}
-            <div className="pt-2 border-t border-line space-y-4">
-              {/* Buyer CREATED State */}
+            {/* Irreversible Action Area */}
+            <div className="pt-4 border-t border-line space-y-3">
+              {error && (
+                <div className="p-3 bg-paper border border-alert/30 rounded-input text-xs text-alert animate-shake">
+                  {error}
+                </div>
+              )}
+
+              {/* BUYER ACTIONS */}
               {isBuyer && order.state === "CREATED" && (
-                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                  <p className="text-xs text-muted sm:max-w-[280px]">
-                    Pay the seller through your banking app, then press confirm.
+                <div className="space-y-2">
+                  <button
+                    onClick={handleMarkPaid}
+                    disabled={actionLoading}
+                    className="w-full py-3 px-4 rounded-input bg-moss text-white text-sm font-semibold hover:opacity-95 disabled:opacity-40 btn-press shadow-xs"
+                  >
+                    {actionLoading ? "Confirming..." : `I Have Paid ₹${order.totalInrFormatted}`}
+                  </button>
+                  <p className="text-[11px] text-center text-muted">
+                    Only click after transferring the exact amount from your own bank account.
                   </p>
-                  <div className="flex items-center gap-2 w-full sm:w-auto">
+                  <div className="text-center pt-2">
                     <button
                       onClick={handleCancel}
                       disabled={actionLoading}
-                      className="px-3 py-2 text-xs text-muted hover:text-ink rounded-input border border-line"
+                      className="text-xs text-muted hover:text-alert underline"
                     >
-                      Cancel trade
-                    </button>
-                    <button
-                      onClick={handleMarkPaid}
-                      disabled={actionLoading}
-                      className="flex-1 sm:flex-none px-5 py-2.5 rounded-input bg-moss text-xs font-semibold shadow-sm hover:opacity-95 disabled:opacity-50"
-                    >
-                      {actionLoading ? "Updating..." : "I have paid"}
+                      Cancel this trade
                     </button>
                   </div>
                 </div>
               )}
 
-              {/* Seller PAID State */}
+              {/* SELLER ACTIONS */}
               {isSeller && order.state === "PAID" && (
-                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                  <p className="text-xs text-muted sm:max-w-[280px] leading-relaxed">
-                    Only release after the money is in your bank account. Check the sender&apos;s name matches {order.buyerName}.
-                  </p>
+                <div className="space-y-2">
                   <button
-                    onClick={() => {
-                      setReleaseConfirmedCheck(false);
-                      setShowReleaseModal(true);
-                    }}
+                    onClick={() => setShowReleaseModal(true)}
                     disabled={actionLoading}
-                    className="w-full sm:w-auto px-5 py-2.5 rounded-input bg-moss text-xs font-semibold shadow-sm hover:opacity-95"
+                    className="w-full py-3 px-4 rounded-input bg-moss text-white text-sm font-semibold hover:opacity-95 disabled:opacity-40 btn-press shadow-xs"
                   >
-                    Release USDT
+                    Release {order.usdtAmountFormatted} USDT to Buyer
                   </button>
-                </div>
-              )}
-
-              {/* Buyer PAID Waiting State */}
-              {isBuyer && order.state === "PAID" && (
-                <div className="flex items-center justify-between gap-4">
-                  <p className="text-xs text-muted leading-relaxed">
-                    Payment reported. Waiting for {order.sellerName} to confirm receipt and release funds.
+                  <p className="text-[11px] text-center text-muted">
+                    Check your bank app first. This transfer is immediate and irreversible.
                   </p>
+                </div>
+              )}
+
+              {/* DISPUTE ACTION */}
+              {(isBuyer || isSeller) && order.state === "PAID" && !dispute && (
+                <div className="pt-2 text-center">
                   <button
                     onClick={() => setShowDisputeModal(true)}
-                    className="text-xs text-muted hover:text-alert underline whitespace-nowrap"
+                    className="text-xs text-muted hover:text-amber underline"
                   >
-                    Report problem
+                    Having trouble? Open a trade dispute
                   </button>
                 </div>
               )}
 
-              {/* Seller CREATED Waiting State */}
-              {isSeller && order.state === "CREATED" && (
-                <div className="text-xs text-muted leading-relaxed">
-                  Waiting for buyer to transfer ₹{order.totalInrFormatted}. Your USDT is safely locked in escrow until you release it.
+              {/* DISPUTE NOTICE */}
+              {order.state === "DISPUTED" && (
+                <div className="p-4 rounded-input bg-amber/10 border border-amber/30 text-xs space-y-2">
+                  <p className="font-semibold text-ink">
+                    This trade is under administrative arbitration.
+                  </p>
+                  <p className="text-muted leading-relaxed">
+                    The escrowed USDT is frozen. A Nevora administrator is reviewing bank transaction proofs.
+                  </p>
+                  {isAdmin && (
+                    <Link
+                      href="/admin"
+                      className="inline-block mt-1 px-3 py-1.5 rounded-input bg-moss text-white font-semibold text-xs btn-press"
+                    >
+                      Arbitrate in Admin Panel &rarr;
+                    </Link>
+                  )}
                 </div>
               )}
 
-              {/* Dispute Button when in PAID state */}
-              {isSeller && order.state === "PAID" && (
-                <div className="pt-2 text-right">
-                  <button
-                    onClick={() => setShowDisputeModal(true)}
-                    className="text-xs text-muted hover:text-alert underline"
-                  >
-                    Payment not received? Open dispute
-                  </button>
+              {/* COMPLETED SUCCESS BANNER */}
+              {isCompleted && (
+                <div className="p-4 rounded-input bg-paper border border-line text-xs space-y-1">
+                  <p className="font-semibold text-buy flex items-center gap-1.5">
+                    <span>✓</span> Trade completed and settled
+                  </p>
+                  <p className="text-muted">
+                    Check your{" "}
+                    <Link href="/wallet" className="text-moss underline">
+                      Wallet
+                    </Link>{" "}
+                    or inspect the immutable journal entries on the{" "}
+                    <Link href="/ledger" className="text-moss underline">
+                      Ledger
+                    </Link>
+                    .
+                  </p>
                 </div>
               )}
-
-              {/* Admin Resolve Link if viewed by Admin */}
-              {isAdmin && order.state === "DISPUTED" && (
-                <Link
-                  href="/admin"
-                  className="block text-center py-2 px-4 rounded-input bg-surface border border-line text-xs font-semibold text-ink hover:border-moss"
-                >
-                  Manage and resolve dispute in Admin Panel →
-                </Link>
-              )}
-            </div>
-          </div>
-
-          {/* ── Order Event Timeline ── */}
-          <div className="bg-surface border border-line rounded-card p-5 sm:p-6 space-y-4">
-            <h3 className="text-xs uppercase tracking-wider text-muted font-semibold">
-              Event timeline
-            </h3>
-
-            <div className="space-y-3 relative pl-4 border-l border-line text-xs">
-              {events.map((ev) => (
-                <div key={ev.id} className="relative group">
-                  <div className="absolute -left-[21px] top-1.5 w-2 h-2 rounded-full bg-muted group-hover:bg-moss" />
-                  <div className="flex items-baseline justify-between">
-                    <span className="font-medium text-ink">
-                      {ev.toState === "CREATED"
-                        ? "Order opened"
-                        : ev.toState === "PAID"
-                        ? "Buyer marked paid"
-                        : ev.toState === "RELEASED"
-                        ? "Seller released USDT"
-                        : ev.toState === "CANCELLED"
-                        ? "Order cancelled"
-                        : ev.toState === "EXPIRED"
-                        ? "Order expired"
-                        : ev.toState}
-                    </span>
-                    <span className="text-[11px] text-muted font-mono tabular-nums">
-                      {new Date(ev.createdAt).toLocaleTimeString([], {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                        second: "2-digit",
-                      })}
-                    </span>
-                  </div>
-                  {ev.note && <p className="text-muted mt-0.5 text-[11px]">{ev.note}</p>}
-                </div>
-              ))}
             </div>
           </div>
         </div>
 
-        {/* Right Column: Chat & Coordination Panel */}
-        <div className={`md:col-span-5 ${mobileTab === "trade" ? "hidden md:block" : ""}`}>
-          <div className="bg-surface border border-line rounded-card p-4 sm:p-5 flex flex-col h-[520px] shadow-sm">
-            <div className="flex items-center justify-between border-b border-line pb-3">
-              <div>
-                <h3 className="text-xs uppercase tracking-wider text-muted font-semibold">
-                  Trade chat
-                </h3>
-                <p className="text-[11px] text-muted mt-0.5">
-                  Keep payment coordination inside Nevora for dispute evidence.
-                </p>
-              </div>
+        {/* Right Column: Chat & Trade Timeline */}
+        <div className={`md:col-span-5 space-y-6 ${mobileTab === "trade" ? "hidden md:block" : "block"}`}>
+          {/* Chat Window */}
+          <div className="bg-surface border border-line rounded-card overflow-hidden flex flex-col h-[480px] shadow-xs">
+            <div className="p-3 bg-paper border-b border-line flex items-center justify-between">
+              <span className="text-xs uppercase tracking-wider text-muted font-semibold">
+                Trade Chat
+              </span>
+              <span className="text-[11px] text-muted">
+                {isBuyer ? order.sellerName : order.buyerName}
+              </span>
             </div>
 
-            <div className="flex-1 overflow-y-auto py-3 space-y-3 text-xs">
+            {/* Messages Area */}
+            <div className="flex-1 p-4 overflow-y-auto space-y-3 text-xs">
               {messages.length === 0 ? (
-                <div className="h-full flex items-center justify-center text-center text-muted text-xs p-4">
-                  No messages yet. Send a message to confirm bank transfer details.
+                <div className="py-16 text-center text-muted space-y-1">
+                  <p>No messages yet.</p>
+                  <p className="text-[11px]">Coordinate payment details directly with your trading partner.</p>
                 </div>
               ) : (
                 messages.map((m) => {
@@ -682,13 +579,13 @@ export default function OrderDetailPage({
                       className={`flex flex-col ${isMe ? "items-end" : "items-start"}`}
                     >
                       <span className="text-[10px] text-muted mb-0.5">
-                        {m.sender_name} {isMe && "(You)"}
+                        {m.sender_name}
                       </span>
                       <div
-                        className={`max-w-[85%] rounded-input px-3 py-2 text-xs leading-relaxed ${
+                        className={`p-2.5 rounded-input max-w-[85%] text-xs ${
                           isMe
-                            ? "bg-paper border border-line text-ink"
-                            : "bg-surface border border-line text-ink"
+                            ? "bg-moss text-white rounded-br-xs"
+                            : "bg-paper text-ink border border-line rounded-bl-xs"
                         }`}
                       >
                         {m.body}
@@ -699,65 +596,108 @@ export default function OrderDetailPage({
               )}
             </div>
 
-            <form onSubmit={handleSendMessage} className="pt-2 border-t border-line flex gap-2">
+            {/* Send Message Form */}
+            <form onSubmit={handleSendMessage} className="p-3 border-t border-line flex gap-2">
               <input
                 type="text"
+                placeholder="Type message..."
                 value={newMessage}
                 onChange={(e) => setNewMessage(e.target.value)}
-                placeholder="Type a message..."
-                className="flex-1 bg-paper border border-line rounded-input py-2 px-3 text-xs text-ink focus:outline-none focus:border-moss"
+                className="flex-1 bg-paper border border-line rounded-input px-3 py-2 text-xs text-ink focus:outline-none focus:border-moss"
               />
               <button
                 type="submit"
-                className="px-3 py-2 bg-moss text-xs font-semibold rounded-input"
+                disabled={!newMessage.trim()}
+                className="px-3.5 py-2 rounded-input bg-moss text-white text-xs font-semibold disabled:opacity-40 btn-press"
               >
                 Send
               </button>
             </form>
           </div>
+
+          {/* Trade Timeline Audit Log */}
+          <div className="bg-surface border border-line rounded-card p-4 space-y-3 shadow-xs">
+            <h3 className="text-xs uppercase tracking-wider text-muted font-semibold">
+              Event Timeline
+            </h3>
+            <div className="space-y-2 text-xs">
+              {events.map((ev) => (
+                <div key={ev.id} className="flex items-start gap-2 text-muted">
+                  <span className="w-1.5 h-1.5 rounded-full bg-moss mt-1.5 flex-shrink-0" />
+                  <div className="space-y-0.5">
+                    <span className="text-ink font-medium">
+                      {ev.fromState ? `${ev.fromState} &rarr; ` : ""}{ev.toState}
+                    </span>
+                    {ev.note && <p className="text-[11px] text-muted">{ev.note}</p>}
+                    <span className="text-[10px] text-muted font-mono block tabular-nums">
+                      {new Date(ev.createdAt).toLocaleTimeString()}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* ── Release Confirmation Dialog (Deliberate 2-step verification) ── */}
+      {/* ── Two-Step Release Confirmation Modal ── */}
       {showReleaseModal && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-[2px] flex items-center justify-center p-4 z-50">
-          <div className="bg-surface border border-line rounded-card max-w-[420px] w-full p-6 space-y-5 shadow-lg">
-            <h3 className="text-base font-semibold text-ink">
-              Release {order.usdtAmountFormatted} USDT to {order.buyerName}?
-            </h3>
-            <p className="text-xs text-muted leading-relaxed">
-              This action is irreversible. Once confirmed, {order.usdtAmountFormatted} USDT will immediately transfer to {order.buyerName}&apos;s wallet.
-            </p>
-
-            <div className="bg-paper border border-line rounded-input p-3 space-y-2 text-xs">
-              <label className="flex items-start gap-2.5 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={releaseConfirmedCheck}
-                  onChange={(e) => setReleaseConfirmedCheck(e.target.checked)}
-                  className="mt-0.5 rounded border-line text-moss focus:ring-moss"
-                />
-                <span className="text-ink text-xs leading-snug">
-                  I have logged into my bank or UPI app and verified that ₹{order.totalInrFormatted} has arrived from {order.buyerName}.
-                </span>
-              </label>
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4 z-50">
+          <div
+            className="bg-surface border border-line rounded-card max-w-[420px] w-full p-6 space-y-5 shadow-lg animate-fade-up"
+            style={{
+              animation: "fadeUp 200ms cubic-bezier(0.22, 1, 0.36, 1) forwards",
+            }}
+          >
+            <div className="flex items-center justify-between border-b border-line pb-3">
+              <h3 className="text-base font-semibold text-ink">
+                Confirm USDT Release
+              </h3>
+              <button
+                onClick={() => setShowReleaseModal(false)}
+                className="text-muted hover:text-ink text-sm p-1"
+                aria-label="Close"
+              >
+                ✕
+              </button>
             </div>
+
+            <div className="p-3.5 bg-paper border border-line rounded-input space-y-2 text-xs">
+              <p className="text-ink font-medium">
+                You are about to release {order.usdtAmountFormatted} USDT to {order.buyerName}.
+              </p>
+              <p className="text-muted leading-relaxed">
+                This action is final and cannot be reversed by anyone, including administrators.
+              </p>
+            </div>
+
+            <label className="flex items-start gap-2.5 text-xs text-ink cursor-pointer select-none">
+              <input
+                type="checkbox"
+                checked={releaseConfirmedCheck}
+                onChange={(e) => setReleaseConfirmedCheck(e.target.checked)}
+                className="mt-0.5 accent-moss w-4 h-4 rounded"
+              />
+              <span>
+                I have logged into my bank/UPI app and verified that I received exactly ₹{order.totalInrFormatted}.
+              </span>
+            </label>
 
             <div className="flex gap-3 pt-2">
               <button
                 type="button"
                 onClick={() => setShowReleaseModal(false)}
-                className="flex-1 py-2 px-3 rounded-input border border-line text-xs font-medium text-muted hover:text-ink"
+                className="flex-1 py-2.5 px-3 rounded-input border border-line text-xs font-medium text-muted hover:text-ink btn-press"
               >
-                Back
+                Cancel
               </button>
               <button
                 type="button"
-                onClick={handleConfirmRelease}
                 disabled={!releaseConfirmedCheck || actionLoading}
-                className="flex-1 py-2 px-3 rounded-input bg-moss text-xs font-semibold disabled:opacity-40"
+                onClick={handleConfirmRelease}
+                className="flex-1 py-2.5 px-3 rounded-input bg-moss text-white text-xs font-semibold disabled:opacity-40 btn-press"
               >
-                {actionLoading ? "Releasing..." : "Confirm release"}
+                {actionLoading ? "Releasing..." : "Yes, Release USDT"}
               </button>
             </div>
           </div>
@@ -766,25 +706,41 @@ export default function OrderDetailPage({
 
       {/* ── Dispute Modal ── */}
       {showDisputeModal && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-[2px] flex items-center justify-center p-4 z-50">
-          <div className="bg-surface border border-line rounded-card max-w-[440px] w-full p-6 space-y-4 shadow-lg">
-            <h3 className="text-base font-semibold text-ink">Open dispute for Trade #{order.id}</h3>
-            <p className="text-xs text-muted leading-relaxed">
-              A platform administrator will review the payment details, trade chat, and bank records. Funds remain safely in escrow during dispute review.
-            </p>
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4 z-50">
+          <div
+            className="bg-surface border border-line rounded-card max-w-[420px] w-full p-6 space-y-5 shadow-lg animate-fade-up"
+            style={{
+              animation: "fadeUp 200ms cubic-bezier(0.22, 1, 0.36, 1) forwards",
+            }}
+          >
+            <div className="flex items-center justify-between border-b border-line pb-3">
+              <h3 className="text-base font-semibold text-ink">
+                Open Trade Dispute
+              </h3>
+              <button
+                onClick={() => setShowDisputeModal(false)}
+                className="text-muted hover:text-ink text-sm p-1"
+                aria-label="Close"
+              >
+                ✕
+              </button>
+            </div>
 
-            <form onSubmit={handleOpenDispute} className="space-y-4">
+            <form onSubmit={handleOpenDispute} className="space-y-4 text-xs">
+              <p className="text-muted leading-relaxed">
+                Opening a dispute will freeze the escrowed USDT. An administrator will arbitrate based on bank statements and UPI reference IDs.
+              </p>
               <div>
-                <label className="block text-xs uppercase tracking-wider text-muted font-semibold mb-1">
+                <label className="block text-ink font-medium mb-1">
                   Reason for dispute
                 </label>
                 <textarea
+                  rows={3}
                   value={disputeReason}
                   onChange={(e) => setDisputeReason(e.target.value)}
-                  rows={3}
+                  placeholder="Explain what happened (e.g. money not received, wrong amount)..."
                   required
-                  placeholder="Explain clearly what happened (e.g., payment was sent but seller hasn't released, or payment was not received)"
-                  className="w-full bg-paper border border-line rounded-input p-2.5 text-xs text-ink focus:outline-none focus:border-alert"
+                  className="w-full bg-paper border border-line rounded-input p-3 text-ink text-xs focus:outline-none focus:border-moss"
                 />
               </div>
 
@@ -792,16 +748,16 @@ export default function OrderDetailPage({
                 <button
                   type="button"
                   onClick={() => setShowDisputeModal(false)}
-                  className="flex-1 py-2 px-3 rounded-input border border-line text-xs font-medium text-muted hover:text-ink"
+                  className="flex-1 py-2.5 px-3 rounded-input border border-line text-xs font-medium text-muted hover:text-ink btn-press"
                 >
-                  Cancel
+                  Back
                 </button>
                 <button
                   type="submit"
-                  disabled={actionLoading || !disputeReason.trim()}
-                  className="flex-1 py-2 px-3 rounded-input bg-alert text-white text-xs font-semibold disabled:opacity-40"
+                  disabled={!disputeReason.trim() || actionLoading}
+                  className="flex-1 py-2.5 px-3 rounded-input bg-alert text-white text-xs font-semibold disabled:opacity-40 btn-press"
                 >
-                  {actionLoading ? "Submitting..." : "Submit dispute"}
+                  {actionLoading ? "Submitting..." : "Submit Dispute"}
                 </button>
               </div>
             </form>
