@@ -89,16 +89,16 @@ export default function Header() {
             <div className="hidden sm:flex items-center gap-3 bg-paper border border-line px-3 py-1 rounded-input text-xs">
               <div className="flex items-baseline gap-1.5">
                 <span className="text-muted text-[11px]">Available</span>
-                <span className="font-mono font-semibold text-ink tabular-nums">
-                  {balances?.availableFormatted ?? "0.00"}
+                <span suppressHydrationWarning className="font-mono font-semibold text-ink tabular-nums">
+                  {mounted && balances ? balances.availableFormatted : "0.00"}
                 </span>
                 <span className="text-[10px] text-muted font-sans">USDT</span>
               </div>
               <span className="text-line">|</span>
               <div className="flex items-baseline gap-1.5">
                 <span className="text-muted text-[11px]">In escrow</span>
-                <span className="font-mono font-semibold text-amber tabular-nums">
-                  {balances?.lockedFormatted ?? "0.00"}
+                <span suppressHydrationWarning className="font-mono font-semibold text-amber tabular-nums">
+                  {mounted && balances ? balances.lockedFormatted : "0.00"}
                 </span>
                 <span className="text-[10px] text-muted font-sans">USDT</span>
               </div>
@@ -108,7 +108,8 @@ export default function Header() {
             <div className="flex items-center bg-surface border border-line rounded-input px-2 py-1 text-xs">
               <span className="text-muted mr-1.5 hidden lg:inline">Act as:</span>
               <select
-                value={currentUserId}
+                suppressHydrationWarning
+                value={mounted ? currentUserId : 1}
                 onChange={(e) => setCurrentUserId(parseInt(e.target.value, 10))}
                 className="bg-transparent text-xs font-medium text-ink focus:outline-none cursor-pointer pr-1"
                 aria-label="Switch User"
