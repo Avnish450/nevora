@@ -2,16 +2,53 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import TradeCard from "@/components/TradeCard";
+import StepperCarousel from "@/components/StepperCarousel";
+import MarqueeRow from "@/components/MarqueeRow";
+import Accordion, { AccordionItem } from "@/components/Accordion";
 
 interface PreviewAd {
   id: number;
-  sellerName: string;
+  seller_name: string;
   priceInr: string;
   remainingUsdtFormatted: string;
   minUsdtFormatted: string;
   maxUsdtFormatted: string;
-  paymentMethod: string;
+  payment_method: string;
 }
+
+const FAQ_ITEMS: AccordionItem[] = [
+  {
+    id: "faq-escrow",
+    question: "How does Nevora's escrow protect my trade?",
+    answer:
+      "When a buyer initiates an order, the seller's USDT is immediately deducted from their available balance and locked in platform escrow. The seller cannot withdraw or double-spend this USDT. It is only released to the buyer after the seller confirms receipt of the INR in their bank account, or by an admin in case of dispute.",
+  },
+  {
+    id: "faq-fees",
+    question: "What are the platform trading fees?",
+    answer:
+      "Nevora charges 0% trading fees for peer-to-peer trades. Buyers pay the exact agreed INR price, and sellers receive the full amount directly to their bank account via UPI or IMPS.",
+  },
+  {
+    id: "faq-bank-holds",
+    question: "What if the buyer claims payment but no INR arrived?",
+    answer:
+      "Never release USDT before verifying funds in your bank or UPI app. If the buyer marks the trade as 'Paid' but funds have not cleared, do not release. Open a dispute immediately. An administrator will inspect bank statements and transaction IDs before making an arbitration ruling.",
+  },
+  {
+    id: "faq-limits",
+    question: "What are the order limits and settlement times?",
+    answer:
+      "Each merchant sets their own minimum and maximum order limits. Typical trades settle within 2 to 5 minutes once payment is initiated. In demo mode, buyers have a 2-minute payment window before the order expires automatically.",
+  },
+  {
+    id: "faq-disputes",
+    question: "How does the dispute arbitration process work?",
+    answer:
+      "Either party can raise a dispute after payment is marked. Funds remain completely locked in platform escrow while our administrative desk reviews payment reference numbers (UTR/UPI reference). If valid payment is proven, funds release to the buyer; otherwise, they return to the seller.",
+  },
+];
 
 export default function HomePage() {
   const [previewAds, setPreviewAds] = useState<PreviewAd[]>([]);
@@ -26,291 +63,256 @@ export default function HomePage() {
   }, []);
 
   return (
-    <div className="space-y-16 sm:space-y-24 max-w-[1120px] mx-auto -mt-2">
+    <div className="space-y-16 sm:space-y-24 max-w-[1120px] mx-auto">
       {/* ═══════════════════════════════════════════════════════
-          HERO: Headline + Live Marketplace Preview side by side
+          HERO: Left: Promise headline & trust note
+                Right: Interactive MoonPay-inspired Trade Card
          ═══════════════════════════════════════════════════════ */}
-      <section className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-start pt-4 sm:pt-8">
-        {/* Left: Promise */}
-        <div className="space-y-6 max-w-[520px]">
-          <h1 className="text-3xl sm:text-[44px] leading-[1.1] font-bold tracking-tight text-ink">
-            Buy and sell USDT
-            <br />
-            with INR.
+      <section className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center pt-2 sm:pt-6">
+        {/* Left: Plain-language promise */}
+        <div className="lg:col-span-7 space-y-6">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-tag bg-surface border border-line text-xs font-medium text-ink shadow-2xs">
+            <span className="w-2 h-2 rounded-full bg-buy inline-block" />
+            <span>Zero platform fees · Automated escrow protection</span>
+          </div>
+
+          <h1 className="text-3xl sm:text-5xl font-bold tracking-tight text-ink leading-[1.12]">
+            Buy and sell USDT with INR.
           </h1>
-          <p className="text-base sm:text-lg text-muted leading-relaxed max-w-[460px]">
-            Your crypto stays locked until you confirm the money arrived.
-            No surprises, no middlemen keeping secrets.
+
+          <p className="text-base sm:text-lg text-muted leading-relaxed max-w-xl">
+            Your crypto stays locked in platform escrow until you confirm the money
+            arrived in your bank. No surprises, no middlemen keeping secrets.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-3 pt-2">
             <Link
               href="/marketplace"
-              className="inline-flex items-center justify-center px-6 py-3 rounded-input bg-moss text-sm font-semibold shadow-sm hover:opacity-95"
+              className="inline-flex items-center justify-center px-6 py-3.5 rounded-input bg-moss text-white text-sm font-semibold shadow-xs hover:opacity-95 transition-opacity btn-press"
             >
               Open marketplace
             </Link>
             <a
               href="#how-it-works"
-              className="inline-flex items-center justify-center px-6 py-3 rounded-input border border-line text-sm font-medium text-muted hover:text-ink hover:border-ink/20"
+              className="inline-flex items-center justify-center px-6 py-3.5 rounded-input border border-line bg-surface text-sm font-medium text-ink hover:bg-paper transition-colors btn-press"
             >
-              How it works
+              How escrow works
             </a>
           </div>
 
-          {/* Trust line */}
-          <p className="text-xs text-muted pt-2">
-            Demo environment — fake money only. No real crypto or INR is moved.
+          {/* Small Trust Note */}
+          <div className="pt-2 flex items-center gap-4 text-xs text-muted">
+            <span className="flex items-center gap-1.5">
+              <span className="text-buy font-bold">✓</span> Direct P2P settlement
+            </span>
+            <span>•</span>
+            <span className="flex items-center gap-1.5">
+              <span className="text-buy font-bold">✓</span> Zero-sum double-entry ledger
+            </span>
+          </div>
+        </div>
+
+        {/* Right: Live Interactive Trade Card */}
+        <div className="lg:col-span-5 flex justify-center lg:justify-end">
+          <TradeCard />
+        </div>
+      </section>
+
+      {/* ═══════════════════════════════════════════════════════
+          TRUST STRIP: Proof points placed right below the hero
+         ═══════════════════════════════════════════════════════ */}
+      <section className="grid grid-cols-2 md:grid-cols-4 gap-4 p-5 rounded-card bg-surface border border-line shadow-xs">
+        <div className="space-y-1">
+          <span className="font-mono text-2xl font-bold text-ink tabular-nums">0%</span>
+          <p className="text-xs text-muted">Platform trading fee</p>
+        </div>
+        <div className="space-y-1">
+          <span className="font-mono text-2xl font-bold text-ink tabular-nums">100%</span>
+          <p className="text-xs text-muted">Escrow locked balance</p>
+        </div>
+        <div className="space-y-1">
+          <span className="font-mono text-2xl font-bold text-ink tabular-nums">&lt; 3 min</span>
+          <p className="text-xs text-muted">Average settlement time</p>
+        </div>
+        <div className="space-y-1">
+          <span className="font-mono text-2xl font-bold text-ink tabular-nums">24/7</span>
+          <p className="text-xs text-muted">UPI & IMPS transfers</p>
+        </div>
+      </section>
+
+      {/* ═══════════════════════════════════════════════════════
+          CHIP ROW: Slow continuous looping marquee (40s linear)
+         ═══════════════════════════════════════════════════════ */}
+      <MarqueeRow />
+
+      {/* ═══════════════════════════════════════════════════════
+          HOW IT WORKS: 4-Step Stepper Carousel
+         ═══════════════════════════════════════════════════════ */}
+      <section id="how-it-works" className="space-y-6">
+        <div className="space-y-2">
+          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-ink">
+            How a Nevora trade works
+          </h2>
+          <p className="text-sm text-muted max-w-xl">
+            Four simple steps. Escrow locks the seller&apos;s crypto at step one, so your funds are never at risk while you pay.
           </p>
         </div>
 
-        {/* Right: Live Marketplace Preview */}
-        <div className="bg-surface border border-line rounded-card overflow-hidden shadow-sm">
-          <div className="flex items-center justify-between px-4 py-3 bg-paper border-b border-line">
-            <span className="text-xs uppercase tracking-wider text-muted font-semibold">
-              Live sell offers
-            </span>
-            <Link
-              href="/marketplace"
-              className="text-xs text-moss hover:underline font-medium"
-            >
-              View all →
-            </Link>
+        <StepperCarousel />
+      </section>
+
+      {/* ═══════════════════════════════════════════════════════
+          ESCROW EXPLAINER: Simple visual diagram
+         ═══════════════════════════════════════════════════════ */}
+      <section className="bg-surface border border-line rounded-card p-6 sm:p-8 space-y-6 shadow-xs">
+        <div className="space-y-1">
+          <span className="text-xs uppercase tracking-wider text-muted font-mono font-semibold">
+            Security Architecture
+          </span>
+          <h3 className="text-xl sm:text-2xl font-bold tracking-tight text-ink">
+            The Nevora escrow guarantee
+          </h3>
+          <p className="text-xs sm:text-sm text-muted max-w-2xl">
+            Neither party can cheat the other. The crypto is held independently until bank confirmation is recorded.
+          </p>
+        </div>
+
+        {/* Visual Escrow Flow Diagram */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4">
+          <div className="p-4 rounded-input bg-paper border border-line space-y-2">
+            <div className="w-8 h-8 rounded-full bg-surface border border-line flex items-center justify-center font-mono text-xs font-bold text-ink">
+              1
+            </div>
+            <h4 className="text-sm font-semibold text-ink">Seller locks USDT</h4>
+            <p className="text-xs text-muted leading-relaxed">
+              When an order is created, the seller&apos;s USDT moves from available balance into locked platform escrow.
+            </p>
           </div>
 
-          {loading ? (
-            <div className="p-4 space-y-3">
-              {[1, 2, 3].map((i) => (
-                <div key={i} className="flex items-center justify-between py-2">
-                  <div className="space-y-1.5">
-                    <div className="h-3.5 w-20 bg-line/40 rounded animate-pulse" />
-                    <div className="h-3 w-32 bg-line/30 rounded animate-pulse" />
-                  </div>
-                  <div className="h-8 w-16 bg-line/40 rounded animate-pulse" />
-                </div>
-              ))}
+          <div className="p-4 rounded-input bg-paper border border-line space-y-2 relative">
+            <div className="w-8 h-8 rounded-full bg-surface border border-line flex items-center justify-center font-mono text-xs font-bold text-moss">
+              2
             </div>
-          ) : previewAds.length > 0 ? (
-            <div className="divide-y divide-line">
-              {previewAds.map((ad) => (
-                <div key={ad.id} className="px-4 py-3.5 flex items-center justify-between hover:bg-paper/40 transition-colors">
-                  <div className="space-y-0.5">
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm font-semibold text-ink">{ad.sellerName}</span>
-                      <span className="px-1.5 py-0.5 text-[10px] font-medium rounded-tag bg-paper border border-line text-muted">
-                        {ad.paymentMethod}
-                      </span>
-                    </div>
-                    <p className="text-xs text-muted font-mono tabular-nums">
-                      {ad.minUsdtFormatted} – {ad.maxUsdtFormatted} USDT available
-                    </p>
-                  </div>
-                  <div className="text-right">
-                    <span className="text-lg font-mono font-bold text-ink tabular-nums block leading-tight">
-                      ₹{ad.priceInr}
-                    </span>
-                    <span className="text-[10px] text-muted">per USDT</span>
-                  </div>
-                </div>
-              ))}
+            <h4 className="text-sm font-semibold text-ink">Buyer transfers INR</h4>
+            <p className="text-xs text-muted leading-relaxed">
+              The buyer pays the seller directly via UPI or IMPS. No bank intermediary or platform fee is deducted.
+            </p>
+          </div>
+
+          <div className="p-4 rounded-input bg-paper border border-line space-y-2">
+            <div className="w-8 h-8 rounded-full bg-surface border border-line flex items-center justify-center font-mono text-xs font-bold text-buy">
+              3
+            </div>
+            <h4 className="text-sm font-semibold text-ink">Automated release</h4>
+            <p className="text-xs text-muted leading-relaxed">
+              Once payment is received, seller releases the trade. The escrow unlocks and deposits USDT to the buyer.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* ═══════════════════════════════════════════════════════
+          LIVE MARKETPLACE PREVIEW TABLE
+         ═══════════════════════════════════════════════════════ */}
+      <section className="space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="space-y-1">
+            <h3 className="text-xl font-bold tracking-tight text-ink">
+              Live market offers
+            </h3>
+            <p className="text-xs text-muted">
+              Real offers from verified sellers. Prices update in real time.
+            </p>
+          </div>
+          <Link
+            href="/marketplace"
+            className="text-xs font-semibold text-moss hover:underline"
+          >
+            View all ads →
+          </Link>
+        </div>
+
+        <div className="bg-surface border border-line rounded-card overflow-hidden shadow-xs">
+          {loading ? (
+            <div className="p-6 text-center text-xs font-mono text-muted">
+              Loading active offers...
+            </div>
+          ) : previewAds.length === 0 ? (
+            <div className="p-8 text-center text-xs text-muted">
+              No active offers at the moment. You can post an ad to sell USDT.
             </div>
           ) : (
-            <div className="px-4 py-8 text-center text-xs text-muted">
-              No active offers right now. Switch to Alice and post a sell ad to see one here.
+            <div className="divide-y divide-line">
+              {previewAds.map((ad) => (
+                <div
+                  key={ad.id}
+                  className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-paper/40 transition-colors"
+                >
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-semibold text-ink">
+                        {ad.seller_name}
+                      </span>
+                      <span className="text-[11px] px-2 py-0.5 rounded-tag bg-paper border border-line font-medium text-muted">
+                        {ad.payment_method}
+                      </span>
+                    </div>
+                    <div className="text-xs text-muted font-mono">
+                      Limit: {ad.minUsdtFormatted} – {ad.maxUsdtFormatted} USDT
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between sm:justify-end gap-6">
+                    <div className="text-right">
+                      <div className="font-mono text-base font-bold text-ink tabular-nums">
+                        ₹{ad.priceInr}
+                      </div>
+                      <div className="text-[10px] text-muted font-sans">per USDT</div>
+                    </div>
+                    <Link
+                      href="/marketplace"
+                      className="px-4 py-2 rounded-input bg-moss text-white text-xs font-semibold hover:opacity-95 transition-opacity btn-press"
+                    >
+                      Buy USDT
+                    </Link>
+                  </div>
+                </div>
+              ))}
             </div>
           )}
         </div>
       </section>
 
       {/* ═══════════════════════════════════════════════════════
-          THREE-STEP TRADE FLOW STRIP
-         ═══════════════════════════════════════════════════════ */}
-      <section id="how-it-works" className="space-y-6 scroll-mt-20">
-        <div className="text-center space-y-1">
-          <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-ink">
-            How a trade works
-          </h2>
-          <p className="text-sm text-muted max-w-[520px] mx-auto">
-            Three steps. No trust required between buyer and seller.
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
-          {/* Step 1: Lock */}
-          <div className="bg-surface border border-line rounded-card p-5 sm:p-6 space-y-3 relative">
-            <div className="flex items-center gap-3">
-              <span className="w-8 h-8 flex items-center justify-center rounded-full bg-paper border border-line text-xs font-bold text-moss font-mono">
-                1
-              </span>
-              <h3 className="text-sm font-semibold text-ink">Lock</h3>
-            </div>
-            <p className="text-xs text-muted leading-relaxed">
-              Buyer picks an offer and confirms the trade.
-              The seller&apos;s USDT is locked in platform escrow immediately — neither party can touch it.
-            </p>
-            {/* Connector line on desktop */}
-            <div className="hidden sm:block absolute top-1/2 -right-3 w-6 border-t border-dashed border-line" />
-          </div>
-
-          {/* Step 2: Pay */}
-          <div className="bg-surface border border-line rounded-card p-5 sm:p-6 space-y-3 relative">
-            <div className="flex items-center gap-3">
-              <span className="w-8 h-8 flex items-center justify-center rounded-full bg-paper border border-line text-xs font-bold text-moss font-mono">
-                2
-              </span>
-              <h3 className="text-sm font-semibold text-ink">Pay</h3>
-            </div>
-            <p className="text-xs text-muted leading-relaxed">
-              Buyer transfers INR directly to the seller using UPI, IMPS or bank transfer.
-              The buyer has 15 minutes to complete the payment and confirm.
-            </p>
-            <div className="hidden sm:block absolute top-1/2 -right-3 w-6 border-t border-dashed border-line" />
-          </div>
-
-          {/* Step 3: Release */}
-          <div className="bg-surface border border-line rounded-card p-5 sm:p-6 space-y-3">
-            <div className="flex items-center gap-3">
-              <span className="w-8 h-8 flex items-center justify-center rounded-full bg-paper border border-line text-xs font-bold text-moss font-mono">
-                3
-              </span>
-              <h3 className="text-sm font-semibold text-ink">Release</h3>
-            </div>
-            <p className="text-xs text-muted leading-relaxed">
-              Seller checks their bank, confirms the money arrived, and releases the USDT.
-              The buyer&apos;s wallet is credited instantly. Trade complete.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* ═══════════════════════════════════════════════════════
-          TRUST & DISPUTES SECTION
+          FAQ ACCORDION: Measured height animation (220ms)
          ═══════════════════════════════════════════════════════ */}
       <section className="space-y-6">
-        <div className="text-center space-y-1">
-          <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-ink">
-            How we handle disputes
-          </h2>
-          <p className="text-sm text-muted max-w-[520px] mx-auto">
-            Things can go wrong. Here is exactly what happens when they do.
+        <div className="space-y-1">
+          <h3 className="text-2xl font-bold tracking-tight text-ink">
+            Frequently asked questions
+          </h3>
+          <p className="text-sm text-muted">
+            Clear, honest answers about P2P trades, bank holds, disputes, and escrow safety.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
-          {/* Escrow guarantee */}
-          <div className="bg-surface border border-line rounded-card p-5 sm:p-6 space-y-3">
-            <h3 className="text-sm font-semibold text-ink">Funds never leave escrow early</h3>
-            <p className="text-xs text-muted leading-relaxed">
-              The seller&apos;s USDT is locked in a platform-controlled escrow account the moment a trade begins.
-              Neither party can withdraw, spend, or move the locked amount until the trade reaches a terminal state.
-            </p>
-          </div>
-
-          {/* Dispute process */}
-          <div className="bg-surface border border-line rounded-card p-5 sm:p-6 space-y-3">
-            <h3 className="text-sm font-semibold text-ink">Dispute resolution process</h3>
-            <p className="text-xs text-muted leading-relaxed">
-              Either party can open a dispute after the buyer marks payment as sent.
-              A platform administrator reviews payment evidence, trade chat, and bank records.
-              The admin decides to release funds to the buyer or refund them to the seller.
-            </p>
-          </div>
-
-          {/* Response time */}
-          <div className="bg-surface border border-line rounded-card p-5 sm:p-6 space-y-3">
-            <h3 className="text-sm font-semibold text-ink">Response times</h3>
-            <p className="text-xs text-muted leading-relaxed">
-              For this demo, the admin user can resolve disputes immediately.
-              In production, Nevora targets a first response within 30 minutes during business hours (10am–10pm IST)
-              and resolution within 24 hours for straightforward cases.
-            </p>
-          </div>
-
-          {/* Immutable ledger */}
-          <div className="bg-surface border border-line rounded-card p-5 sm:p-6 space-y-3">
-            <h3 className="text-sm font-semibold text-ink">Immutable audit trail</h3>
-            <p className="text-xs text-muted leading-relaxed">
-              Every movement of funds is recorded as a double-entry journal in the platform ledger.
-              Ledger rows can never be edited or deleted — corrections are new reversing entries.
-              Both parties and the admin can view the complete event timeline for any trade.
-            </p>
-          </div>
-        </div>
+        <Accordion items={FAQ_ITEMS} />
       </section>
 
       {/* ═══════════════════════════════════════════════════════
-          RISK DISCLOSURE
+          RISK DISCLOSURE & LEGAL FOOTER
          ═══════════════════════════════════════════════════════ */}
-      <section className="bg-paper border border-line rounded-card p-5 sm:p-6 space-y-3 text-xs">
-        <h3 className="text-sm font-semibold text-ink">Important information about P2P trading</h3>
-        <div className="space-y-2 text-muted leading-relaxed">
-          <p>
-            P2P cryptocurrency trading involves risks that you should understand before you trade:
-          </p>
-          <ul className="list-disc pl-5 space-y-1">
-            <li>
-              <strong className="text-ink font-medium">Bank holds and reversals.</strong>{" "}
-              Banks may hold, delay, or reverse INR transfers for various reasons. If a payment is reversed after USDT is released, the platform cannot recover the crypto.
-            </li>
-            <li>
-              <strong className="text-ink font-medium">Name mismatches.</strong>{" "}
-              Always verify that the sender name on the bank transfer matches the buyer&apos;s verified name on the platform before releasing.
-            </li>
-            <li>
-              <strong className="text-ink font-medium">Regulatory changes.</strong>{" "}
-              Indian regulations on cryptocurrency may change. You are responsible for understanding and complying with applicable laws including TDS obligations.
-            </li>
-            <li>
-              <strong className="text-ink font-medium">This is a demo.</strong>{" "}
-              No real money, cryptocurrency, or personal data is involved in this prototype.
-            </li>
-          </ul>
-        </div>
+      <section className="pt-8 border-t border-line text-xs text-muted space-y-3 leading-relaxed">
+        <h4 className="font-semibold text-ink uppercase tracking-wider text-[11px]">
+          Risk Disclosure & Demo Disclaimer
+        </h4>
+        <p>
+          Nevora is a demonstrated prototype showcasing peer-to-peer cryptocurrency escrow architecture and immutable double-entry ledger bookkeeping. This environment operates exclusively with simulated funds. No real Indian Rupees or real Tether (USDT) on public blockchains are transferred or handled.
+        </p>
+        <p>
+          Cryptocurrency transactions carry inherent risks. In real trading, always verify the sender&apos;s legal name matches their KYC profile before releasing escrow.
+        </p>
       </section>
-
-      {/* ═══════════════════════════════════════════════════════
-          FOOTER
-         ═══════════════════════════════════════════════════════ */}
-      <footer className="border-t border-line pt-8 pb-4 space-y-6">
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 text-xs">
-          {/* Brand */}
-          <div className="space-y-2">
-            <span className="text-base font-bold tracking-tight text-ink">nevora</span>
-            <p className="text-muted leading-relaxed">
-              P2P USDT/INR marketplace with escrow.
-              Calm, trustworthy, exact.
-            </p>
-          </div>
-
-          {/* Navigation */}
-          <div className="space-y-2">
-            <span className="text-xs uppercase tracking-wider text-muted font-semibold">Platform</span>
-            <div className="flex flex-col gap-1.5">
-              <Link href="/marketplace" className="text-muted hover:text-ink transition-colors">Marketplace</Link>
-              <Link href="/create-ad" className="text-muted hover:text-ink transition-colors">Post a sell ad</Link>
-              <Link href="/wallet" className="text-muted hover:text-ink transition-colors">Wallet</Link>
-              <Link href="/orders" className="text-muted hover:text-ink transition-colors">My orders</Link>
-            </div>
-          </div>
-
-          {/* Legal */}
-          <div className="space-y-2">
-            <span className="text-xs uppercase tracking-wider text-muted font-semibold">Legal</span>
-            <div className="flex flex-col gap-1.5 text-muted">
-              <span>Entity registration: pending</span>
-              <span>Support: demo@nevora.example</span>
-              <span>Response: within 30 minutes (demo)</span>
-            </div>
-          </div>
-        </div>
-
-        <div className="border-t border-line pt-4 flex flex-col sm:flex-row items-center justify-between gap-2 text-[11px] text-muted">
-          <span>© 2026 Nevora. Prototype — no real money.</span>
-          <span>
-            Cryptocurrency trading involves risk. Past performance is not indicative of future results.
-          </span>
-        </div>
-      </footer>
     </div>
   );
 }
