@@ -9,8 +9,10 @@ export default function Header() {
   const { currentUser, balances, users, currentUserId, setCurrentUserId } = useUser();
   const pathname = usePathname();
   const [isDark, setIsDark] = useState(true);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
     // Check initial dark mode
     const isDarkStored = localStorage.getItem("nevora_theme") === "dark" ||
       (!("nevora_theme" in localStorage) && window.matchMedia("(prefers-color-scheme: dark)").matches);
@@ -42,7 +44,7 @@ export default function Header() {
     { label: "Ledger", href: "/ledger" },
   ];
 
-  if (currentUser?.role === "admin") {
+  if (mounted && currentUser?.role === "admin") {
     navItems.push({ label: "Admin", href: "/admin" });
   }
 
