@@ -6,7 +6,7 @@ import {
   getOrdersByUser,
   expireOverdueOrders,
 } from "@/lib/services/orders";
-import { parseUsdt, formatUsdt, formatInr } from "@/lib/money";
+import { parseUsdt, formatUsdtDisplay, formatInr } from "@/lib/money";
 import { config } from "@/lib/config";
 import { jsonResponse, errorResponse } from "@/lib/json";
 
@@ -24,7 +24,7 @@ export async function GET(req: NextRequest) {
     const orders = await getOrdersByUser(client, user.id);
     const formatted = orders.map((o) => ({
       ...o,
-      usdtAmountFormatted: formatUsdt(o.usdtAmount),
+      usdtAmountFormatted: formatUsdtDisplay(o.usdtAmount),
       priceInrFormatted: formatInr(o.priceInrPaise),
       totalInrFormatted: formatInr(o.totalInrPaise),
     }));
@@ -66,7 +66,7 @@ export async function POST(req: NextRequest) {
       success: true,
       order: {
         ...order,
-        usdtAmountFormatted: formatUsdt(order.usdtAmount),
+        usdtAmountFormatted: formatUsdtDisplay(order.usdtAmount),
         priceInrFormatted: formatInr(order.priceInrPaise),
         totalInrFormatted: formatInr(order.totalInrPaise),
       },

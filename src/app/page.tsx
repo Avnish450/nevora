@@ -1,307 +1,316 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
-import { useRouter } from "next/navigation";
-import { useUser } from "@/context/UserContext";
+import React, { useState, useEffect } from "react";
+import Link from "next/link";
 
-interface Ad {
+interface PreviewAd {
   id: number;
-  sellerId: number;
   sellerName: string;
   priceInr: string;
-  totalUsdtFormatted: string;
   remainingUsdtFormatted: string;
   minUsdtFormatted: string;
   maxUsdtFormatted: string;
   paymentMethod: string;
-  paymentDetails: string;
 }
 
-export default function MarketplacePage() {
-  const router = useRouter();
-  const { currentUser, balances, fetchWithUser, refreshUser } = useUser();
-  const [ads, setAds] = useState<Ad[]>([]);
+export default function HomePage() {
+  const [previewAds, setPreviewAds] = useState<PreviewAd[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  // Buy modal state
-  const [selectedAd, setSelectedAd] = useState<Ad | null>(null);
-  const [buyAmount, setBuyAmount] = useState<string>("");
-  const [submitting, setSubmitting] = useState(false);
-  const [buyError, setBuyError] = useState<string | null>(null);
-
-  const fetchAds = useCallback(async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      const res = await fetch("/api/ads");
-      if (!res.ok) throw new Error("Failed to load ads");
-      const data = await res.json();
-      setAds(data.ads || []);
-    } catch (err) {
-      setError((err as Error).message);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
 
   useEffect(() => {
-    fetchAds();
-  }, [fetchAds]);
-
-  const handleOpenBuy = (ad: Ad) => {
-    setSelectedAd(ad);
-    setBuyAmount(ad.minUsdtFormatted);
-    setBuyError(null);
-  };
-
-  const calculateTotalInr = () => {
-    if (!selectedAd || !buyAmount) return "0.00";
-    const amount = parseFloat(buyAmount);
-    const price = parseFloat(selectedAd.priceInr);
-    if (isNaN(amount) || isNaN(price) || amount <= 0) return "0.00";
-    return (amount * price).toFixed(2);
-  };
-
-  const handleCreateOrder = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!selectedAd || !buyAmount) return;
-
-    try {
-      setSubmitting(true);
-      setBuyError(null);
-
-      const res = await fetchWithUser("/api/orders", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          adId: selectedAd.id,
-          usdtAmount: buyAmount,
-        }),
-      });
-
-      const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data.error || "Failed to create order");
-      }
-
-      await refreshUser();
-      router.push(`/orders/${data.order.id}`);
-    } catch (err) {
-      setBuyError((err as Error).message);
-    } finally {
-      setSubmitting(false);
-    }
-  };
+    fetch("/api/ads")
+      .then((r) => r.json())
+      .then((data) => setPreviewAds((data.ads || []).slice(0, 3)))
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, []);
 
   return (
-    <div className="space-y-6">
-      {/* Demo helper banner */}
-      <div className="bg-slate-900/90 border border-slate-800 rounded-xl p-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-        <div>
-          <h2 className="text-sm font-semibold text-emerald-400">
-            Demo Marketplace (Fake Money Only)
+    <div className="space-y-16 sm:space-y-24 max-w-[1120px] mx-auto -mt-2">
+      {/* ═══════════════════════════════════════════════════════
+          HERO: Headline + Live Marketplace Preview side by side
+         ═══════════════════════════════════════════════════════ */}
+      <section className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-start pt-4 sm:pt-8">
+        {/* Left: Promise */}
+        <div className="space-y-6 max-w-[520px]">
+          <h1 className="text-3xl sm:text-[44px] leading-[1.1] font-bold tracking-tight text-ink">
+            Buy and sell USDT
+            <br />
+            with INR.
+          </h1>
+          <p className="text-base sm:text-lg text-muted leading-relaxed max-w-[460px]">
+            Your crypto stays locked until you confirm the money arrived.
+            No surprises, no middlemen keeping secrets.
+          </p>
+
+          <div className="flex flex-col sm:flex-row gap-3 pt-2">
+            <Link
+              href="/marketplace"
+              className="inline-flex items-center justify-center px-6 py-3 rounded-input bg-moss text-sm font-semibold shadow-sm hover:opacity-95"
+            >
+              Open marketplace
+            </Link>
+            <a
+              href="#how-it-works"
+              className="inline-flex items-center justify-center px-6 py-3 rounded-input border border-line text-sm font-medium text-muted hover:text-ink hover:border-ink/20"
+            >
+              How it works
+            </a>
+          </div>
+
+          {/* Trust line */}
+          <p className="text-xs text-muted pt-2">
+            Demo environment — fake money only. No real crypto or INR is moved.
+          </p>
+        </div>
+
+        {/* Right: Live Marketplace Preview */}
+        <div className="bg-surface border border-line rounded-card overflow-hidden shadow-sm">
+          <div className="flex items-center justify-between px-4 py-3 bg-paper border-b border-line">
+            <span className="text-xs uppercase tracking-wider text-muted font-semibold">
+              Live sell offers
+            </span>
+            <Link
+              href="/marketplace"
+              className="text-xs text-moss hover:underline font-medium"
+            >
+              View all →
+            </Link>
+          </div>
+
+          {loading ? (
+            <div className="p-4 space-y-3">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="flex items-center justify-between py-2">
+                  <div className="space-y-1.5">
+                    <div className="h-3.5 w-20 bg-line/40 rounded animate-pulse" />
+                    <div className="h-3 w-32 bg-line/30 rounded animate-pulse" />
+                  </div>
+                  <div className="h-8 w-16 bg-line/40 rounded animate-pulse" />
+                </div>
+              ))}
+            </div>
+          ) : previewAds.length > 0 ? (
+            <div className="divide-y divide-line">
+              {previewAds.map((ad) => (
+                <div key={ad.id} className="px-4 py-3.5 flex items-center justify-between hover:bg-paper/40 transition-colors">
+                  <div className="space-y-0.5">
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-semibold text-ink">{ad.sellerName}</span>
+                      <span className="px-1.5 py-0.5 text-[10px] font-medium rounded-tag bg-paper border border-line text-muted">
+                        {ad.paymentMethod}
+                      </span>
+                    </div>
+                    <p className="text-xs text-muted font-mono tabular-nums">
+                      {ad.minUsdtFormatted} – {ad.maxUsdtFormatted} USDT available
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-lg font-mono font-bold text-ink tabular-nums block leading-tight">
+                      ₹{ad.priceInr}
+                    </span>
+                    <span className="text-[10px] text-muted">per USDT</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="px-4 py-8 text-center text-xs text-muted">
+              No active offers right now. Switch to Alice and post a sell ad to see one here.
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* ═══════════════════════════════════════════════════════
+          THREE-STEP TRADE FLOW STRIP
+         ═══════════════════════════════════════════════════════ */}
+      <section id="how-it-works" className="space-y-6 scroll-mt-20">
+        <div className="text-center space-y-1">
+          <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-ink">
+            How a trade works
           </h2>
-          <p className="text-xs text-slate-400 mt-1">
-            Current actor: <span className="text-white font-bold">{currentUser?.name}</span> ({currentUser?.role}).{" "}
-            {currentUser?.name === "Alice"
-              ? "You are Alice (Seller). To buy, switch to Bob using the top-right user switcher."
-              : currentUser?.name === "Bob"
-              ? "You are Bob (Buyer). Pick an ad below and click 'Buy USDT' to lock the seller's funds in escrow."
-              : "You are Admin. Switch to Bob to buy, or check the Admin Panel."}
+          <p className="text-sm text-muted max-w-[520px] mx-auto">
+            Three steps. No trust required between buyer and seller.
           </p>
         </div>
-        <button
-          onClick={fetchAds}
-          className="text-xs px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium transition"
-        >
-          ↻ Refresh Ads
-        </button>
-      </div>
 
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-white">P2P Buy USDT</h1>
-          <p className="text-sm text-slate-400">Buy USDT with INR via secure platform escrow</p>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
+          {/* Step 1: Lock */}
+          <div className="bg-surface border border-line rounded-card p-5 sm:p-6 space-y-3 relative">
+            <div className="flex items-center gap-3">
+              <span className="w-8 h-8 flex items-center justify-center rounded-full bg-paper border border-line text-xs font-bold text-moss font-mono">
+                1
+              </span>
+              <h3 className="text-sm font-semibold text-ink">Lock</h3>
+            </div>
+            <p className="text-xs text-muted leading-relaxed">
+              Buyer picks an offer and confirms the trade.
+              The seller&apos;s USDT is locked in platform escrow immediately — neither party can touch it.
+            </p>
+            {/* Connector line on desktop */}
+            <div className="hidden sm:block absolute top-1/2 -right-3 w-6 border-t border-dashed border-line" />
+          </div>
+
+          {/* Step 2: Pay */}
+          <div className="bg-surface border border-line rounded-card p-5 sm:p-6 space-y-3 relative">
+            <div className="flex items-center gap-3">
+              <span className="w-8 h-8 flex items-center justify-center rounded-full bg-paper border border-line text-xs font-bold text-moss font-mono">
+                2
+              </span>
+              <h3 className="text-sm font-semibold text-ink">Pay</h3>
+            </div>
+            <p className="text-xs text-muted leading-relaxed">
+              Buyer transfers INR directly to the seller using UPI, IMPS or bank transfer.
+              The buyer has 15 minutes to complete the payment and confirm.
+            </p>
+            <div className="hidden sm:block absolute top-1/2 -right-3 w-6 border-t border-dashed border-line" />
+          </div>
+
+          {/* Step 3: Release */}
+          <div className="bg-surface border border-line rounded-card p-5 sm:p-6 space-y-3">
+            <div className="flex items-center gap-3">
+              <span className="w-8 h-8 flex items-center justify-center rounded-full bg-paper border border-line text-xs font-bold text-moss font-mono">
+                3
+              </span>
+              <h3 className="text-sm font-semibold text-ink">Release</h3>
+            </div>
+            <p className="text-xs text-muted leading-relaxed">
+              Seller checks their bank, confirms the money arrived, and releases the USDT.
+              The buyer&apos;s wallet is credited instantly. Trade complete.
+            </p>
+          </div>
         </div>
-      </div>
+      </section>
 
-      {error && (
-        <div className="p-3 bg-red-950/60 border border-red-800/80 rounded-lg text-sm text-red-300">
-          {error}
-        </div>
-      )}
-
-      {loading ? (
-        <div className="p-12 text-center text-slate-500">Loading active ads...</div>
-      ) : ads.length === 0 ? (
-        <div className="p-12 text-center bg-slate-900 border border-slate-800 rounded-xl">
-          <p className="text-slate-400">No active ads right now.</p>
-          <p className="text-xs text-slate-500 mt-1">
-            Switch to Alice and post a sell ad from the &quot;Create Ad&quot; page.
+      {/* ═══════════════════════════════════════════════════════
+          TRUST & DISPUTES SECTION
+         ═══════════════════════════════════════════════════════ */}
+      <section className="space-y-6">
+        <div className="text-center space-y-1">
+          <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-ink">
+            How we handle disputes
+          </h2>
+          <p className="text-sm text-muted max-w-[520px] mx-auto">
+            Things can go wrong. Here is exactly what happens when they do.
           </p>
         </div>
-      ) : (
-        <div className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm">
-              <thead className="bg-slate-800/60 text-xs uppercase text-slate-400 font-semibold border-b border-slate-800">
-                <tr>
-                  <th className="py-3.5 px-4">Seller</th>
-                  <th className="py-3.5 px-4">Price / USDT</th>
-                  <th className="py-3.5 px-4">Available</th>
-                  <th className="py-3.5 px-4">Order Limit</th>
-                  <th className="py-3.5 px-4">Payment Method</th>
-                  <th className="py-3.5 px-4 text-right">Action</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-800/60">
-                {ads.map((ad) => {
-                  const isOwner = currentUser?.id === ad.sellerId;
-                  return (
-                    <tr key={ad.id} className="hover:bg-slate-800/30 transition">
-                      <td className="py-4 px-4 font-medium text-white">
-                        <div className="flex items-center gap-2">
-                          <div className="w-7 h-7 rounded-full bg-emerald-500/20 text-emerald-400 font-bold flex items-center justify-center text-xs">
-                            {ad.sellerName[0]}
-                          </div>
-                          <span>{ad.sellerName}</span>
-                          {isOwner && (
-                            <span className="text-[10px] px-1.5 py-0.5 rounded bg-slate-800 text-slate-400">
-                              You
-                            </span>
-                          )}
-                        </div>
-                      </td>
-                      <td className="py-4 px-4 font-mono font-bold text-emerald-400 text-base">
-                        ₹{ad.priceInr}
-                      </td>
-                      <td className="py-4 px-4 font-mono text-slate-300">
-                        {ad.remainingUsdtFormatted} USDT
-                      </td>
-                      <td className="py-4 px-4 text-xs text-slate-400 font-mono">
-                        {ad.minUsdtFormatted} - {ad.maxUsdtFormatted} USDT
-                      </td>
-                      <td className="py-4 px-4">
-                        <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-indigo-500/10 text-indigo-300 border border-indigo-500/20">
-                          {ad.paymentMethod}
-                        </span>
-                      </td>
-                      <td className="py-4 px-4 text-right">
-                        <button
-                          onClick={() => handleOpenBuy(ad)}
-                          disabled={isOwner}
-                          className={`px-4 py-1.5 rounded-lg text-xs font-semibold shadow transition ${
-                            isOwner
-                              ? "bg-slate-800 text-slate-500 cursor-not-allowed"
-                              : "bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold"
-                          }`}
-                        >
-                          {isOwner ? "Your Ad" : "Buy USDT"}
-                        </button>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+          {/* Escrow guarantee */}
+          <div className="bg-surface border border-line rounded-card p-5 sm:p-6 space-y-3">
+            <h3 className="text-sm font-semibold text-ink">Funds never leave escrow early</h3>
+            <p className="text-xs text-muted leading-relaxed">
+              The seller&apos;s USDT is locked in a platform-controlled escrow account the moment a trade begins.
+              Neither party can withdraw, spend, or move the locked amount until the trade reaches a terminal state.
+            </p>
+          </div>
+
+          {/* Dispute process */}
+          <div className="bg-surface border border-line rounded-card p-5 sm:p-6 space-y-3">
+            <h3 className="text-sm font-semibold text-ink">Dispute resolution process</h3>
+            <p className="text-xs text-muted leading-relaxed">
+              Either party can open a dispute after the buyer marks payment as sent.
+              A platform administrator reviews payment evidence, trade chat, and bank records.
+              The admin decides to release funds to the buyer or refund them to the seller.
+            </p>
+          </div>
+
+          {/* Response time */}
+          <div className="bg-surface border border-line rounded-card p-5 sm:p-6 space-y-3">
+            <h3 className="text-sm font-semibold text-ink">Response times</h3>
+            <p className="text-xs text-muted leading-relaxed">
+              For this demo, the admin user can resolve disputes immediately.
+              In production, Nevora targets a first response within 30 minutes during business hours (10am–10pm IST)
+              and resolution within 24 hours for straightforward cases.
+            </p>
+          </div>
+
+          {/* Immutable ledger */}
+          <div className="bg-surface border border-line rounded-card p-5 sm:p-6 space-y-3">
+            <h3 className="text-sm font-semibold text-ink">Immutable audit trail</h3>
+            <p className="text-xs text-muted leading-relaxed">
+              Every movement of funds is recorded as a double-entry journal in the platform ledger.
+              Ledger rows can never be edited or deleted — corrections are new reversing entries.
+              Both parties and the admin can view the complete event timeline for any trade.
+            </p>
           </div>
         </div>
-      )}
+      </section>
 
-      {/* Buy Order Modal */}
-      {selectedAd && (
-        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-6 space-y-5 shadow-2xl">
-            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-              <h3 className="text-lg font-bold text-white">
-                Buy USDT from {selectedAd.sellerName}
-              </h3>
-              <button
-                onClick={() => setSelectedAd(null)}
-                className="text-slate-400 hover:text-white text-sm"
-              >
-                ✕
-              </button>
+      {/* ═══════════════════════════════════════════════════════
+          RISK DISCLOSURE
+         ═══════════════════════════════════════════════════════ */}
+      <section className="bg-paper border border-line rounded-card p-5 sm:p-6 space-y-3 text-xs">
+        <h3 className="text-sm font-semibold text-ink">Important information about P2P trading</h3>
+        <div className="space-y-2 text-muted leading-relaxed">
+          <p>
+            P2P cryptocurrency trading involves risks that you should understand before you trade:
+          </p>
+          <ul className="list-disc pl-5 space-y-1">
+            <li>
+              <strong className="text-ink font-medium">Bank holds and reversals.</strong>{" "}
+              Banks may hold, delay, or reverse INR transfers for various reasons. If a payment is reversed after USDT is released, the platform cannot recover the crypto.
+            </li>
+            <li>
+              <strong className="text-ink font-medium">Name mismatches.</strong>{" "}
+              Always verify that the sender name on the bank transfer matches the buyer&apos;s verified name on the platform before releasing.
+            </li>
+            <li>
+              <strong className="text-ink font-medium">Regulatory changes.</strong>{" "}
+              Indian regulations on cryptocurrency may change. You are responsible for understanding and complying with applicable laws including TDS obligations.
+            </li>
+            <li>
+              <strong className="text-ink font-medium">This is a demo.</strong>{" "}
+              No real money, cryptocurrency, or personal data is involved in this prototype.
+            </li>
+          </ul>
+        </div>
+      </section>
+
+      {/* ═══════════════════════════════════════════════════════
+          FOOTER
+         ═══════════════════════════════════════════════════════ */}
+      <footer className="border-t border-line pt-8 pb-4 space-y-6">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 text-xs">
+          {/* Brand */}
+          <div className="space-y-2">
+            <span className="text-base font-bold tracking-tight text-ink">nevora</span>
+            <p className="text-muted leading-relaxed">
+              P2P USDT/INR marketplace with escrow.
+              Calm, trustworthy, exact.
+            </p>
+          </div>
+
+          {/* Navigation */}
+          <div className="space-y-2">
+            <span className="text-xs uppercase tracking-wider text-muted font-semibold">Platform</span>
+            <div className="flex flex-col gap-1.5">
+              <Link href="/marketplace" className="text-muted hover:text-ink transition-colors">Marketplace</Link>
+              <Link href="/create-ad" className="text-muted hover:text-ink transition-colors">Post a sell ad</Link>
+              <Link href="/wallet" className="text-muted hover:text-ink transition-colors">Wallet</Link>
+              <Link href="/orders" className="text-muted hover:text-ink transition-colors">My orders</Link>
             </div>
+          </div>
 
-            <div className="space-y-3 bg-slate-800/40 p-3.5 rounded-xl border border-slate-800 text-xs">
-              <div className="flex justify-between">
-                <span className="text-slate-400">Unit Price:</span>
-                <span className="font-mono font-bold text-emerald-400">₹{selectedAd.priceInr}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-slate-400">Remaining Available:</span>
-                <span className="font-mono text-slate-200">{selectedAd.remainingUsdtFormatted} USDT</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-slate-400">Limits:</span>
-                <span className="font-mono text-slate-300">
-                  {selectedAd.minUsdtFormatted} - {selectedAd.maxUsdtFormatted} USDT
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-slate-400">Payment Details:</span>
-                <span className="font-medium text-slate-200">
-                  {selectedAd.paymentMethod} ({selectedAd.paymentDetails})
-                </span>
-              </div>
+          {/* Legal */}
+          <div className="space-y-2">
+            <span className="text-xs uppercase tracking-wider text-muted font-semibold">Legal</span>
+            <div className="flex flex-col gap-1.5 text-muted">
+              <span>Entity registration: pending</span>
+              <span>Support: demo@nevora.example</span>
+              <span>Response: within 30 minutes (demo)</span>
             </div>
-
-            <form onSubmit={handleCreateOrder} className="space-y-4">
-              <div>
-                <label className="block text-xs font-semibold uppercase text-slate-400 mb-1">
-                  Amount in USDT to Buy
-                </label>
-                <div className="relative">
-                  <input
-                    type="number"
-                    step="any"
-                    value={buyAmount}
-                    onChange={(e) => setBuyAmount(e.target.value)}
-                    placeholder="e.g. 50"
-                    required
-                    className="w-full bg-slate-800 border border-slate-700 rounded-lg py-2.5 px-3 text-white font-mono text-sm focus:outline-none focus:border-emerald-500"
-                  />
-                  <span className="absolute right-3 top-2.5 text-xs font-bold text-slate-400">
-                    USDT
-                  </span>
-                </div>
-              </div>
-
-              <div className="bg-slate-800/60 p-3 rounded-lg flex items-center justify-between">
-                <span className="text-xs text-slate-400 font-semibold">Total to Pay Seller:</span>
-                <span className="text-lg font-mono font-bold text-white">
-                  ₹{calculateTotalInr()}
-                </span>
-              </div>
-
-              {buyError && (
-                <div className="p-2.5 bg-red-950/60 border border-red-800 rounded-lg text-xs text-red-300">
-                  {buyError}
-                </div>
-              )}
-
-              <div className="flex gap-3 pt-2">
-                <button
-                  type="button"
-                  onClick={() => setSelectedAd(null)}
-                  className="flex-1 py-2.5 px-4 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold transition"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={submitting}
-                  className="flex-1 py-2.5 px-4 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs transition disabled:opacity-50"
-                >
-                  {submitting ? "Locking Escrow..." : "Confirm & Lock Escrow"}
-                </button>
-              </div>
-            </form>
           </div>
         </div>
-      )}
+
+        <div className="border-t border-line pt-4 flex flex-col sm:flex-row items-center justify-between gap-2 text-[11px] text-muted">
+          <span>© 2026 Nevora. Prototype — no real money.</span>
+          <span>
+            Cryptocurrency trading involves risk. Past performance is not indicative of future results.
+          </span>
+        </div>
+      </footer>
     </div>
   );
 }

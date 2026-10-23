@@ -40,7 +40,19 @@ export function calculateTotalInrPaise(
 }
 
 /**
+ * Format Indian digit grouping (e.g., 1234567 -> 12,34,567).
+ */
+export function formatIndianGrouping(wholeStr: string): string {
+  if (wholeStr.length <= 3) return wholeStr;
+  const lastThree = wholeStr.slice(-3);
+  const remaining = wholeStr.slice(0, -3);
+  const grouped = remaining.replace(/\B(?=(\d{2})+(?!\d))/g, ",");
+  return `${grouped},${lastThree}`;
+}
+
+/**
  * Format USDT from smallest units to a human-readable string.
+ * Full precision (6 decimals).
  * e.g., 1.5 USDT → "1.500000"
  */
 export function formatUsdt(units: bigint): string {
@@ -49,12 +61,25 @@ export function formatUsdt(units: bigint): string {
   const whole = abs / ONE_USDT;
   const frac = abs % ONE_USDT;
   const fracStr = frac.toString().padStart(USDT_DECIMALS, "0");
-  return `${isNegative ? "-" : ""}${whole}.${fracStr}`;
+  return `${isNegative ? "-" : ""}${formatIndianGrouping(whole.toString())}.${fracStr}`;
 }
 
 /**
- * Format INR from paise to a human-readable string.
- * e.g., 8800 paise → "88.00"
+ * Format USDT for standard interface display (2 decimals, e.g. 100.00).
+ */
+export function formatUsdtDisplay(units: bigint): string {
+  const isNegative = units < ZERO_BIGINT;
+  const abs = isNegative ? -units : units;
+  const whole = abs / ONE_USDT;
+  const frac = abs % ONE_USDT;
+  // Two decimal digits
+  const twoDec = (frac / BigInt(10_000)).toString().padStart(2, "0");
+  return `${isNegative ? "-" : ""}${formatIndianGrouping(whole.toString())}.${twoDec}`;
+}
+
+/**
+ * Format INR from paise to a human-readable string with Indian digit grouping.
+ * e.g., 880000 paise → "₹8,800.00"
  */
 export function formatInr(paise: bigint): string {
   const isNegative = paise < ZERO_BIGINT;
@@ -62,7 +87,8 @@ export function formatInr(paise: bigint): string {
   const whole = abs / ONE_INR;
   const frac = abs % ONE_INR;
   const fracStr = frac.toString().padStart(INR_DECIMALS, "0");
-  return `${isNegative ? "-" : ""}${whole}.${fracStr}`;
+  const groupedWhole = formatIndianGrouping(whole.toString());
+  return `${isNegative ? "-" : ""}${groupedWhole}.${fracStr}`;
 }
 
 /**

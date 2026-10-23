@@ -2,7 +2,7 @@ import { NextRequest } from "next/server";
 import { getPool } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import { withdrawal, getUserBalances } from "@/lib/services/ledger";
-import { parseUsdt, formatUsdt } from "@/lib/money";
+import { parseUsdt, formatUsdtDisplay } from "@/lib/money";
 import { jsonResponse, errorResponse } from "@/lib/json";
 import crypto from "crypto";
 
@@ -60,7 +60,7 @@ export async function POST(req: NextRequest) {
     if (balances.available < amountUnits) {
       await client.query("ROLLBACK");
       return errorResponse(
-        `Insufficient available balance. You have ${formatUsdt(balances.available)} USDT`,
+        `Insufficient available balance. You have ${formatUsdtDisplay(balances.available)} USDT`,
         400
       );
     }
@@ -82,12 +82,12 @@ export async function POST(req: NextRequest) {
       txHash: fakeTxHash,
       network,
       address: trimmedAddress,
-      amountFormatted: formatUsdt(amountUnits),
+      amountFormatted: formatUsdtDisplay(amountUnits),
       newBalances: {
         available: newBalances.available,
         locked: newBalances.locked,
-        availableFormatted: formatUsdt(newBalances.available),
-        lockedFormatted: formatUsdt(newBalances.locked),
+        availableFormatted: formatUsdtDisplay(newBalances.available),
+        lockedFormatted: formatUsdtDisplay(newBalances.locked),
       },
     });
   } catch (err) {

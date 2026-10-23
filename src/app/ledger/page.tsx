@@ -45,114 +45,104 @@ export default function LedgerPage() {
   }, [fetchLedger]);
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-white">Immutable Ledger Audit</h1>
-          <p className="text-sm text-slate-400">
+    <div className="space-y-6 max-w-[1120px] mx-auto">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="space-y-1">
+          <h1 className="text-2xl font-bold tracking-tight text-ink">Ledger Audit</h1>
+          <p className="text-sm text-muted">
             {isGlobal
-              ? "Global double-entry audit trail across all accounts & journals"
-              : `Audited ledger entries for ${currentUser?.name}`}
+              ? "System-wide double-entry journal records."
+              : `Immutable entries recorded for ${currentUser?.name}.`}
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           {currentUser?.role === "admin" && (
             <button
               onClick={() => setViewAll(!viewAll)}
-              className={`text-xs px-3.5 py-1.5 rounded-lg border font-semibold transition ${
+              className={`text-xs px-3 py-1.5 rounded-input border font-medium ${
                 viewAll
-                  ? "bg-purple-600 border-purple-500 text-white"
-                  : "bg-slate-800 border-slate-700 text-slate-300 hover:text-white"
+                  ? "bg-paper text-ink font-semibold border-moss"
+                  : "bg-surface text-muted border-line hover:text-ink"
               }`}
             >
-              {viewAll ? "Viewing All (System-wide)" : "View System-Wide Ledger"}
+              {viewAll ? "Viewing all accounts" : "Show all accounts"}
             </button>
           )}
           <button
             onClick={fetchLedger}
-            className="text-xs px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium transition"
+            className="text-xs px-3 py-1.5 rounded-input border border-line bg-surface text-muted hover:text-ink font-medium"
           >
-            ↻ Refresh
+            Refresh
           </button>
         </div>
       </div>
 
-      <div className="bg-slate-900/60 border border-slate-800 rounded-xl p-4 text-xs text-slate-400 flex items-center justify-between">
-        <div>
-          <strong className="text-white">Ledger Invariant 3 &amp; 5:</strong> Every balance change is an immutable entry produced in the same DB transaction as the business event. Rows are never edited or deleted (enforced by DB trigger).
-        </div>
-        <div className="text-emerald-400 font-mono font-bold whitespace-nowrap ml-4">
-          ✓ IMMUTABLE
-        </div>
+      <div className="p-3.5 bg-surface border border-line rounded-card text-xs text-muted flex items-start justify-between">
+        <p className="max-w-[720px] leading-relaxed">
+          <strong className="text-ink">Double-entry principle:</strong> Every balance change is an immutable row tied to a zero-sum journal. Entries cannot be edited or deleted (enforced by PostgreSQL trigger). Corrections are made via reversing entries.
+        </p>
+        <span className="text-[10px] uppercase font-mono px-2 py-0.5 rounded-tag bg-paper border border-line text-moss font-semibold whitespace-nowrap ml-4">
+          Immutable
+        </span>
       </div>
 
       {loading ? (
-        <div className="p-12 text-center text-slate-500">Loading ledger entries...</div>
+        <div className="py-20 text-center text-xs text-muted font-mono">
+          Loading ledger entries...
+        </div>
       ) : entries.length === 0 ? (
-        <div className="p-12 text-center bg-slate-900 border border-slate-800 rounded-xl text-slate-400">
+        <div className="p-8 text-center bg-surface border border-line rounded-card text-xs text-muted">
           No ledger entries recorded yet.
         </div>
       ) : (
-        <div className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow">
+        <div className="bg-surface border border-line rounded-card overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm">
-              <thead className="bg-slate-800/60 text-xs uppercase text-slate-400 font-semibold border-b border-slate-800">
+            <table className="w-full text-left text-xs font-mono">
+              <thead className="bg-paper border-b border-line text-muted uppercase text-[10px] tracking-wider font-semibold font-sans">
                 <tr>
-                  <th className="py-3 px-4">Entry ID</th>
-                  <th className="py-3 px-4">Journal ID</th>
-                  <th className="py-3 px-4">Event Type</th>
-                  {isGlobal && <th className="py-3 px-4">Account Owner</th>}
-                  <th className="py-3 px-4">Account Kind</th>
-                  <th className="py-3 px-4 text-right">Amount (USDT)</th>
-                  <th className="py-3 px-4 text-right">Timestamp</th>
+                  <th className="py-2.5 px-4">Entry ID</th>
+                  <th className="py-2.5 px-4">Journal</th>
+                  <th className="py-2.5 px-4">Type</th>
+                  {isGlobal && <th className="py-2.5 px-4 font-sans">Owner</th>}
+                  <th className="py-2.5 px-4">Bucket</th>
+                  <th className="py-2.5 px-4 text-right">Amount (USDT)</th>
+                  <th className="py-2.5 px-4 text-right">Timestamp</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-800/60 font-mono text-xs">
+              <tbody className="divide-y divide-line text-xs">
                 {entries.map((row) => {
                   const isPositive = !row.amountFormatted.startsWith("-");
                   return (
-                    <tr key={row.id} className="hover:bg-slate-800/30 transition">
-                      <td className="py-3 px-4 text-slate-400">#{row.id}</td>
-                      <td className="py-3 px-4 text-slate-300">
+                    <tr key={row.id} className="hover:bg-paper/40">
+                      <td className="py-3 px-4 text-muted tabular-nums">#{row.id}</td>
+                      <td className="py-3 px-4 text-ink tabular-nums">
                         J#{row.journalId}
                         {row.referenceType && (
-                          <span className="text-[10px] text-slate-500 ml-1">
+                          <span className="text-[10px] text-muted ml-1 font-sans">
                             ({row.referenceType}:{row.referenceId})
                           </span>
                         )}
                       </td>
-                      <td className="py-3 px-4 font-sans">
-                        <span className="px-2 py-0.5 rounded text-[11px] font-semibold uppercase bg-slate-800 text-slate-200">
-                          {row.journalType}
-                        </span>
+                      <td className="py-3 px-4 font-sans font-medium text-ink capitalize">
+                        {row.journalType}
                       </td>
                       {isGlobal && (
-                        <td className="py-3 px-4 font-sans text-slate-200">
+                        <td className="py-3 px-4 font-sans text-ink">
                           {row.userName}
                         </td>
                       )}
-                      <td className="py-3 px-4">
-                        <span
-                          className={`px-1.5 py-0.5 rounded text-[10px] font-bold uppercase ${
-                            row.accountKind === "available"
-                              ? "bg-emerald-500/10 text-emerald-400"
-                              : row.accountKind === "locked"
-                              ? "bg-amber-500/10 text-amber-400"
-                              : "bg-blue-500/10 text-blue-400"
-                          }`}
-                        >
-                          {row.accountKind}
-                        </span>
+                      <td className="py-3 px-4 font-sans uppercase text-[10px] text-muted">
+                        {row.accountKind}
                       </td>
                       <td
-                        className={`py-3 px-4 text-right font-bold text-sm ${
-                          isPositive ? "text-emerald-400" : "text-rose-400"
+                        className={`py-3 px-4 text-right font-semibold tabular-nums ${
+                          isPositive ? "text-buy" : "text-alert"
                         }`}
                       >
                         {isPositive ? `+${row.amountFormatted}` : row.amountFormatted}
                       </td>
-                      <td className="py-3 px-4 text-right text-slate-400 font-sans text-xs">
+                      <td className="py-3 px-4 text-right text-muted font-sans text-[11px] tabular-nums">
                         {new Date(row.createdAt).toLocaleTimeString([], {
                           hour: "2-digit",
                           minute: "2-digit",

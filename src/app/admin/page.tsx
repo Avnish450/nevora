@@ -86,7 +86,7 @@ export default function AdminPage() {
   }, [fetchDisputes, runReconcile]);
 
   const handleResolve = async (disputeId: number, favourBuyer: boolean) => {
-    if (!confirm(`Are you sure you want to ${favourBuyer ? "Release funds to Buyer" : "Refund funds to Seller"}?`)) {
+    if (!confirm(`Confirm dispute resolution: ${favourBuyer ? "Release USDT to buyer" : "Refund USDT to seller"}?`)) {
       return;
     }
     try {
@@ -112,102 +112,100 @@ export default function AdminPage() {
 
   if (currentUser?.role !== "admin") {
     return (
-      <div className="p-8 text-center bg-slate-900 border border-slate-800 rounded-2xl space-y-4">
-        <h2 className="text-xl font-bold text-white">Admin Access Restricted</h2>
-        <p className="text-sm text-slate-400">
-          You are currently viewing as <strong className="text-white">{currentUser?.name}</strong> ({currentUser?.role}).
-        </p>
-        <p className="text-xs text-slate-500">
-          Use the <strong>User Switcher</strong> in the top right header to switch to &quot;Admin&quot; to access this screen.
-        </p>
+      <div className="max-w-[500px] mx-auto py-16 text-center space-y-3">
+        <div className="p-6 bg-surface border border-line rounded-card space-y-3">
+          <h2 className="text-base font-semibold text-ink">Admin area restricted</h2>
+          <p className="text-xs text-muted leading-relaxed">
+            You are currently viewing as <strong className="text-ink">{currentUser?.name}</strong> ({currentUser?.role}).
+          </p>
+          <p className="text-[11px] text-muted">
+            Switch your active profile to &quot;Admin&quot; in the header user switcher to view this panel.
+          </p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-8">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight text-white">Platform Administration</h1>
-        <p className="text-sm text-slate-400">
-          Resolve disputed escrow trades and audit ledger double-entry reconciliation.
+    <div className="space-y-8 max-w-[1120px] mx-auto">
+      <div className="space-y-1">
+        <h1 className="text-2xl font-bold tracking-tight text-ink">Platform Administration</h1>
+        <p className="text-sm text-muted">
+          Escrow dispute arbitration and double-entry ledger reconciliation.
         </p>
       </div>
 
-      {/* ── Reconciliation Section ── */}
-      <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-5">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-4">
+      {/* ── Reconciliation Audit Section ── */}
+      <div className="bg-surface border border-line rounded-card p-5 space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-line pb-3">
           <div>
-            <h2 className="text-base font-bold text-white flex items-center gap-2">
-              <span>⚖️</span> Double-Entry Reconciliation Check
+            <h2 className="text-sm font-semibold text-ink">
+              Double-entry reconciliation check
             </h2>
-            <p className="text-xs text-slate-400 mt-0.5">
-              Invariant 4: Every account&apos;s cached balance must exactly equal the sum of its ledger entries.
+            <p className="text-xs text-muted mt-0.5">
+              Invariant 4: Each account&apos;s cached balance must exactly equal the sum of its ledger entries.
             </p>
           </div>
           <button
             onClick={runReconcile}
             disabled={reconcileLoading}
-            className="px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs transition shadow disabled:opacity-50"
+            className="px-3.5 py-1.5 rounded-input bg-moss text-xs font-semibold disabled:opacity-40"
           >
-            {reconcileLoading ? "Auditing Ledger..." : "Run Reconcile Audit"}
+            {reconcileLoading ? "Auditing..." : "Run reconciliation audit"}
           </button>
         </div>
 
         {reconcileResult && (
-          <div className="space-y-4">
+          <div className="space-y-3">
             <div
-              className={`p-4 rounded-xl border flex items-center justify-between text-xs font-semibold ${
+              className={`p-3 rounded-input border flex items-center justify-between text-xs font-medium ${
                 reconcileResult.ok
-                  ? "bg-emerald-950/40 border-emerald-800 text-emerald-300"
-                  : "bg-rose-950/40 border-rose-800 text-rose-300"
+                  ? "bg-paper border-line text-buy"
+                  : "bg-paper border-alert/30 text-alert"
               }`}
             >
               <div className="flex items-center gap-2">
-                <span className="text-base">{reconcileResult.ok ? "✓" : "✗"}</span>
+                <span>{reconcileResult.ok ? "✓" : "✗"}</span>
                 <span>
                   {reconcileResult.ok
-                    ? "Reconciliation Passed! 0 Discrepancies across all accounts."
+                    ? "Reconciliation passed. 0 discrepancies across all system accounts."
                     : `Discrepancies found: ${reconcileResult.discrepancyCount}`}
                 </span>
               </div>
-              <span className="text-[10px] text-slate-400 font-mono font-normal">
-                Checked at {new Date(reconcileResult.checkedAt).toLocaleTimeString()}
+              <span className="text-[11px] text-muted font-mono font-normal tabular-nums">
+                {new Date(reconcileResult.checkedAt).toLocaleTimeString()}
               </span>
             </div>
 
-            {/* Account Audit Table */}
+            {/* Account breakdown */}
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs font-mono">
-                <thead className="bg-slate-800/60 uppercase text-[11px] text-slate-400 font-semibold border-b border-slate-800">
+                <thead className="bg-paper border-b border-line text-muted uppercase text-[10px] tracking-wider font-sans font-semibold">
                   <tr>
-                    <th className="py-2.5 px-3">Account</th>
-                    <th className="py-2.5 px-3">Owner</th>
-                    <th className="py-2.5 px-3">Kind</th>
-                    <th className="py-2.5 px-3 text-right">Cached Balance</th>
-                    <th className="py-2.5 px-3 text-right">Sum of Entries</th>
-                    <th className="py-2.5 px-3 text-center">Status</th>
+                    <th className="py-2 px-3">Account ID</th>
+                    <th className="py-2 px-3 font-sans">Owner</th>
+                    <th className="py-2 px-3 font-sans">Kind</th>
+                    <th className="py-2 px-3 text-right">Cached balance</th>
+                    <th className="py-2 px-3 text-right">Sum of entries</th>
+                    <th className="py-2 px-3 text-center font-sans">Audit</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-800/60">
+                <tbody className="divide-y divide-line text-xs">
                   {reconcileResult.accountsSummary.map((acc) => (
-                    <tr key={acc.id} className="hover:bg-slate-800/20">
-                      <td className="py-2 px-3 text-slate-400">Acc #{acc.id}</td>
-                      <td className="py-2 px-3 font-sans font-medium text-white">{acc.userName}</td>
-                      <td className="py-2 px-3">
-                        <span className="uppercase text-[10px] font-bold text-slate-400">
-                          {acc.kind}
-                        </span>
+                    <tr key={acc.id} className="hover:bg-paper/30">
+                      <td className="py-2 px-3 text-muted tabular-nums">#{acc.id}</td>
+                      <td className="py-2 px-3 font-sans font-medium text-ink">{acc.userName}</td>
+                      <td className="py-2 px-3 font-sans uppercase text-[10px] text-muted">
+                        {acc.kind}
                       </td>
-                      <td className="py-2 px-3 text-right font-bold text-slate-200">
+                      <td className="py-2 px-3 text-right text-ink font-semibold tabular-nums">
                         {acc.cachedBalance} USDT
                       </td>
-                      <td className="py-2 px-3 text-right text-slate-300">
+                      <td className="py-2 px-3 text-right text-muted tabular-nums">
                         {acc.computedBalance} USDT
                       </td>
-                      <td className="py-2 px-3 text-center">
-                        <span className="text-emerald-400 font-bold font-sans text-[11px]">
-                          ✓ MATCH
-                        </span>
+                      <td className="py-2 px-3 text-center font-sans">
+                        <span className="text-buy font-medium text-[11px]">✓ Match</span>
                       </td>
                     </tr>
                   ))}
@@ -218,30 +216,30 @@ export default function AdminPage() {
         )}
       </div>
 
-      {/* ── Disputes Section ── */}
-      <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-5">
-        <div className="flex items-center justify-between border-b border-slate-800 pb-4">
+      {/* ── Active Escrow Disputes ── */}
+      <div className="bg-surface border border-line rounded-card p-5 space-y-4">
+        <div className="flex items-center justify-between border-b border-line pb-3">
           <div>
-            <h2 className="text-base font-bold text-white flex items-center gap-2">
-              <span>🛡️</span> Escrow Trade Disputes
+            <h2 className="text-sm font-semibold text-ink">
+              Escrow trade disputes
             </h2>
-            <p className="text-xs text-slate-400 mt-0.5">
-              Review and resolve disputes. Funds are locked in escrow until you release or refund.
+            <p className="text-xs text-muted mt-0.5">
+              Funds remain safely held in escrow until an administrator confirms evidence and resolves.
             </p>
           </div>
           <button
             onClick={fetchDisputes}
-            className="text-xs px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium transition"
+            className="text-xs px-2.5 py-1 rounded-input border border-line bg-paper text-muted hover:text-ink font-medium"
           >
-            ↻ Refresh Disputes
+            Refresh
           </button>
         </div>
 
         {disputesLoading ? (
-          <div className="p-8 text-center text-slate-500 text-xs">Loading disputes...</div>
+          <div className="py-12 text-center text-xs text-muted font-mono">Loading disputes...</div>
         ) : disputes.length === 0 ? (
-          <div className="p-8 text-center text-slate-500 text-xs bg-slate-800/20 rounded-xl">
-            No active or past disputes found.
+          <div className="py-8 text-center bg-paper border border-line rounded-input text-xs text-muted">
+            No active or past disputes recorded.
           </div>
         ) : (
           <div className="space-y-4">
@@ -250,69 +248,63 @@ export default function AdminPage() {
               return (
                 <div
                   key={d.dispute_id}
-                  className="bg-slate-800/40 border border-slate-800 rounded-xl p-4 space-y-3"
+                  className="bg-paper border border-line rounded-input p-4 space-y-3"
                 >
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800/80 pb-3">
-                    <div className="flex items-center gap-2">
-                      <span className="font-bold text-white text-sm">Dispute #{d.dispute_id}</span>
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-line pb-2.5">
+                    <div className="flex items-center gap-2 text-xs">
+                      <strong className="text-ink">Dispute #{d.dispute_id}</strong>
                       <Link
                         href={`/orders/${d.order_id}`}
-                        className="text-xs font-mono text-emerald-400 hover:underline"
+                        className="text-moss hover:underline font-mono"
                       >
                         (Order #{d.order_id})
                       </Link>
-                      <span
-                        className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded ${
-                          isResolved
-                            ? "bg-purple-500/20 text-purple-300"
-                            : "bg-rose-500/20 text-rose-300"
-                        }`}
-                      >
+                      <span className="text-[10px] uppercase font-semibold px-2 py-0.5 rounded-tag bg-surface border border-line text-muted">
                         {d.order_state}
                       </span>
                     </div>
 
-                    <div className="text-xs text-slate-400 font-mono">
-                      {d.usdtAmountFormatted} USDT • ₹{d.totalInrFormatted} INR
+                    <div className="text-xs font-mono font-semibold text-ink tabular-nums">
+                      {d.usdtAmountFormatted} USDT • ₹{d.totalInrFormatted}
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
                     <div>
-                      <span className="text-slate-500">Buyer:</span>{" "}
-                      <strong className="text-white">{d.buyer_name}</strong>
+                      <span className="text-muted">Buyer:</span>{" "}
+                      <strong className="text-ink font-medium">{d.buyer_name}</strong>
                     </div>
                     <div>
-                      <span className="text-slate-500">Seller:</span>{" "}
-                      <strong className="text-white">{d.seller_name}</strong>
+                      <span className="text-muted">Seller:</span>{" "}
+                      <strong className="text-ink font-medium">{d.seller_name}</strong>
                     </div>
-                    <div className="sm:col-span-2 bg-slate-900/60 p-2.5 rounded-lg border border-slate-800">
-                      <span className="text-slate-500 font-semibold block text-[10px] uppercase">
-                        Reason from {d.opened_by_name}:
+                    <div className="sm:col-span-2 bg-surface p-2.5 rounded-input border border-line">
+                      <span className="text-muted text-[10px] uppercase font-semibold block">
+                        Reason opened by {d.opened_by_name}:
                       </span>
-                      <p className="text-slate-200 mt-0.5 italic">&quot;{d.reason}&quot;</p>
+                      <p className="text-ink mt-0.5">&quot;{d.reason}&quot;</p>
                     </div>
                   </div>
 
                   {isResolved ? (
-                    <div className="text-xs text-purple-300 bg-purple-950/30 p-2.5 rounded-lg border border-purple-900/50">
-                      ✓ Resolved: <strong className="uppercase">{d.resolution?.replace(/_/g, " ")}</strong>
+                    <div className="text-xs text-moss bg-surface p-2 rounded-input border border-line font-medium">
+                      ✓ Resolved: {d.resolution?.replace(/_/g, " ")}
                     </div>
                   ) : (
-                    <div className="flex flex-wrap gap-3 pt-1">
+                    <div className="flex flex-wrap gap-2 pt-1">
                       <button
                         onClick={() => handleResolve(d.dispute_id, true)}
                         disabled={resolvingId === d.dispute_id}
-                        className="flex-1 py-2 px-3 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs transition disabled:opacity-50"
+                        className="flex-1 py-2 px-3 rounded-input bg-buy text-white text-xs font-semibold disabled:opacity-40"
                       >
-                        Release to Buyer ({d.buyer_name})
+                        Release USDT to buyer ({d.buyer_name})
                       </button>
                       <button
                         onClick={() => handleResolve(d.dispute_id, false)}
                         disabled={resolvingId === d.dispute_id}
-                        className="flex-1 py-2 px-3 rounded-lg bg-orange-600 hover:bg-orange-500 text-white font-bold text-xs transition disabled:opacity-50"
+                        className="flex-1 py-2 px-3 rounded-input bg-sell text-white text-xs font-semibold disabled:opacity-40"
                       >
-                        Refund Seller ({d.seller_name})
+                        Refund USDT to seller ({d.seller_name})
                       </button>
                     </div>
                   )}

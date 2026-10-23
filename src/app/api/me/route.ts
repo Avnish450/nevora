@@ -2,7 +2,7 @@ import { NextRequest } from "next/server";
 import { getPool } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import { getUserBalances } from "@/lib/services/ledger";
-import { formatUsdt } from "@/lib/money";
+import { formatUsdtDisplay } from "@/lib/money";
 import { jsonResponse, errorResponse } from "@/lib/json";
 
 export async function GET(req: NextRequest) {
@@ -17,8 +17,8 @@ export async function GET(req: NextRequest) {
       balances: {
         available: balances.available,
         locked: balances.locked,
-        availableFormatted: formatUsdt(balances.available),
-        lockedFormatted: formatUsdt(balances.locked),
+        availableFormatted: formatUsdtDisplay(balances.available),
+        lockedFormatted: formatUsdtDisplay(balances.locked),
       },
     });
   } catch (err) {

@@ -2,7 +2,7 @@ import { NextRequest } from "next/server";
 import { getPool } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import { faucetCredit, getUserBalances } from "@/lib/services/ledger";
-import { parseUsdt, formatUsdt } from "@/lib/money";
+import { parseUsdt, formatUsdtDisplay } from "@/lib/money";
 import { jsonResponse, errorResponse } from "@/lib/json";
 
 export async function POST(req: NextRequest) {
@@ -34,12 +34,12 @@ export async function POST(req: NextRequest) {
     return jsonResponse({
       success: true,
       journalId: result.journalId,
-      creditedUsdt: formatUsdt(amount),
+      creditedUsdt: formatUsdtDisplay(amount),
       newBalances: {
         available: balances.available,
         locked: balances.locked,
-        availableFormatted: formatUsdt(balances.available),
-        lockedFormatted: formatUsdt(balances.locked),
+        availableFormatted: formatUsdtDisplay(balances.available),
+        lockedFormatted: formatUsdtDisplay(balances.locked),
       },
     });
   } catch (err) {

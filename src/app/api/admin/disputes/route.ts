@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 import { getPool } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
-import { formatUsdt, formatInr } from "@/lib/money";
+import { formatUsdtDisplay, formatInr } from "@/lib/money";
 import { jsonResponse, errorResponse } from "@/lib/json";
 
 export async function GET(req: NextRequest) {
@@ -42,7 +42,7 @@ export async function GET(req: NextRequest) {
 
     const disputes = rows.map((r: Record<string, any>) => ({
       ...r,
-      usdtAmountFormatted: formatUsdt(BigInt(r.usdt_amount)),
+      usdtAmountFormatted: formatUsdtDisplay(BigInt(r.usdt_amount)),
       priceInrFormatted: formatInr(BigInt(r.price_inr_paise)),
       totalInrFormatted: formatInr(BigInt(r.total_inr_paise)),
     }));

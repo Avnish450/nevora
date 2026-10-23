@@ -11,8 +11,8 @@
     "migrate:test": "npx tsx scripts/migrate.ts --test",
     "seed": "npx tsx scripts/seed.ts",
     "db:reset": "npx tsx scripts/reset-db.ts && npm run migrate && npm run seed",
-    "test": "DATABASE_URL_TEST=postgres://nevora_test:nevora_test@localhost:5433/nevora_test vitest run",
-    "test:watch": "DATABASE_URL_TEST=postgres://nevora_test:nevora_test@localhost:5433/nevora_test vitest"
+    "test": "DATABASE_URL_TEST=postgres://localhost:5432/nevora_test vitest run",
+    "test:watch": "DATABASE_URL_TEST=postgres://localhost:5432/nevora_test vitest"
   },
   "dependencies": {
     "dotenv": "^18.0.9",

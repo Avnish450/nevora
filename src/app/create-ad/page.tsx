@@ -22,7 +22,7 @@ export default function CreateAdPage() {
     setError(null);
 
     if (currentUser?.role !== "seller" && currentUser?.role !== "admin") {
-      setError("Only sellers can create sell ads. Switch user to Alice or Admin.");
+      setError("Only sellers can post sell advertisements. Switch to Alice or Admin.");
       return;
     }
 
@@ -42,9 +42,7 @@ export default function CreateAdPage() {
       });
 
       const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data.error || "Failed to create ad");
-      }
+      if (!res.ok) throw new Error(data.error || "Failed to publish ad");
 
       await refreshUser();
       router.push("/");
@@ -56,35 +54,35 @@ export default function CreateAdPage() {
   };
 
   return (
-    <div className="max-w-xl mx-auto space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight text-white">Create USDT Sell Ad</h1>
-        <p className="text-sm text-slate-400 mt-1">
-          Post an ad to sell your USDT for INR. Funds are locked into escrow when a buyer opens an order.
+    <div className="max-w-[560px] mx-auto space-y-6">
+      <div className="space-y-1">
+        <h1 className="text-2xl font-bold tracking-tight text-ink">Post Sell Advertisement</h1>
+        <p className="text-sm text-muted">
+          Offer your USDT for INR. Funds are locked into escrow when a buyer initiates an order.
         </p>
       </div>
 
-      <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-5">
-        <div className="bg-slate-800/40 p-3 rounded-lg border border-slate-800 flex items-center justify-between text-xs">
-          <span className="text-slate-400">Your Available Balance:</span>
-          <span className="font-mono font-bold text-emerald-400">
-            {balances?.availableFormatted ?? "0.000000"} USDT
+      <div className="bg-surface border border-line rounded-card p-6 space-y-5">
+        <div className="bg-paper border border-line rounded-input p-3 flex items-center justify-between text-xs">
+          <span className="text-muted">Your available balance:</span>
+          <span className="font-mono font-semibold text-ink tabular-nums">
+            {balances?.availableFormatted ?? "0.00"} USDT
           </span>
         </div>
 
         {error && (
-          <div className="p-3 bg-red-950/60 border border-red-800 rounded-lg text-xs text-red-300">
+          <div className="p-3 bg-paper border border-alert/30 rounded-input text-xs text-alert">
             {error}
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4 text-xs">
           <div>
-            <label className="block text-xs font-semibold uppercase text-slate-400 mb-1">
-              Unit Price (INR per USDT)
+            <label className="block uppercase tracking-wider text-muted font-semibold mb-1">
+              Unit price (INR per USDT)
             </label>
             <div className="relative">
-              <span className="absolute left-3 top-2.5 text-slate-400 font-bold text-sm">₹</span>
+              <span className="absolute left-3 top-2 text-muted font-mono font-medium">₹</span>
               <input
                 type="number"
                 step="0.01"
@@ -92,14 +90,14 @@ export default function CreateAdPage() {
                 value={priceInr}
                 onChange={(e) => setPriceInr(e.target.value)}
                 required
-                className="w-full bg-slate-800 border border-slate-700 rounded-lg py-2.5 pl-8 pr-3 text-white font-mono text-sm focus:outline-none focus:border-emerald-500"
+                className="w-full bg-paper border border-line rounded-input py-2 pl-7 pr-3 text-ink font-mono focus:outline-none focus:border-moss"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-xs font-semibold uppercase text-slate-400 mb-1">
-              Total USDT to Sell
+            <label className="block uppercase tracking-wider text-muted font-semibold mb-1">
+              Total USDT to sell
             </label>
             <div className="relative">
               <input
@@ -114,61 +112,67 @@ export default function CreateAdPage() {
                   }
                 }}
                 required
-                className="w-full bg-slate-800 border border-slate-700 rounded-lg py-2.5 px-3 text-white font-mono text-sm focus:outline-none focus:border-emerald-500"
+                className="w-full bg-paper border border-line rounded-input py-2 px-3 text-ink font-mono focus:outline-none focus:border-moss"
               />
-              <span className="absolute right-3 top-2.5 text-xs font-bold text-slate-400">USDT</span>
+              <span className="absolute right-3 top-2 text-muted font-mono font-medium">USDT</span>
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-semibold uppercase text-slate-400 mb-1">
-                Min Order Limit (USDT)
+              <label className="block uppercase tracking-wider text-muted font-semibold mb-1">
+                Min order limit
               </label>
-              <input
-                type="number"
-                step="any"
-                min="1"
-                value={minUsdt}
-                onChange={(e) => setMinUsdt(e.target.value)}
-                required
-                className="w-full bg-slate-800 border border-slate-700 rounded-lg py-2.5 px-3 text-white font-mono text-sm focus:outline-none focus:border-emerald-500"
-              />
+              <div className="relative">
+                <input
+                  type="number"
+                  step="any"
+                  min="1"
+                  value={minUsdt}
+                  onChange={(e) => setMinUsdt(e.target.value)}
+                  required
+                  className="w-full bg-paper border border-line rounded-input py-2 px-3 text-ink font-mono focus:outline-none focus:border-moss"
+                />
+                <span className="absolute right-3 top-2 text-muted font-mono text-[10px]">USDT</span>
+              </div>
             </div>
             <div>
-              <label className="block text-xs font-semibold uppercase text-slate-400 mb-1">
-                Max Order Limit (USDT)
+              <label className="block uppercase tracking-wider text-muted font-semibold mb-1">
+                Max order limit
               </label>
-              <input
-                type="number"
-                step="any"
-                min="1"
-                value={maxUsdt}
-                onChange={(e) => setMaxUsdt(e.target.value)}
-                required
-                className="w-full bg-slate-800 border border-slate-700 rounded-lg py-2.5 px-3 text-white font-mono text-sm focus:outline-none focus:border-emerald-500"
-              />
+              <div className="relative">
+                <input
+                  type="number"
+                  step="any"
+                  min="1"
+                  value={maxUsdt}
+                  onChange={(e) => setMaxUsdt(e.target.value)}
+                  required
+                  className="w-full bg-paper border border-line rounded-input py-2 px-3 text-ink font-mono focus:outline-none focus:border-moss"
+                />
+                <span className="absolute right-3 top-2 text-muted font-mono text-[10px]">USDT</span>
+              </div>
             </div>
           </div>
 
           <div>
-            <label className="block text-xs font-semibold uppercase text-slate-400 mb-1">
-              Payment Method
+            <label className="block uppercase tracking-wider text-muted font-semibold mb-1">
+              Payment method
             </label>
             <select
               value={paymentMethod}
               onChange={(e) => setPaymentMethod(e.target.value)}
-              className="w-full bg-slate-800 border border-slate-700 rounded-lg py-2.5 px-3 text-white text-sm focus:outline-none focus:border-emerald-500"
+              className="w-full bg-paper border border-line rounded-input py-2 px-3 text-ink focus:outline-none focus:border-moss cursor-pointer"
             >
-              <option value="UPI">UPI</option>
+              <option value="UPI">UPI (Google Pay, PhonePe, Paytm)</option>
               <option value="IMPS">IMPS Bank Transfer</option>
-              <option value="PayTM">PayTM</option>
+              <option value="PayTM">Paytm Wallet / Bank</option>
             </select>
           </div>
 
           <div>
-            <label className="block text-xs font-semibold uppercase text-slate-400 mb-1">
-              Payment Details (e.g. UPI ID or Account Info)
+            <label className="block uppercase tracking-wider text-muted font-semibold mb-1">
+              Payment details (Account number / UPI ID)
             </label>
             <input
               type="text"
@@ -176,16 +180,20 @@ export default function CreateAdPage() {
               onChange={(e) => setPaymentDetails(e.target.value)}
               placeholder="e.g. alice@upi"
               required
-              className="w-full bg-slate-800 border border-slate-700 rounded-lg py-2.5 px-3 text-white text-sm focus:outline-none focus:border-emerald-500"
+              className="w-full bg-paper border border-line rounded-input py-2 px-3 text-ink focus:outline-none focus:border-moss"
             />
           </div>
+
+          <p className="text-[11px] text-muted leading-relaxed pt-1">
+            Publishing this ad makes it visible in the marketplace. Your USDT remains in your balance until a buyer creates a trade, at which point the required amount is safely locked.
+          </p>
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-3 px-4 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-sm transition shadow-lg disabled:opacity-50 mt-2"
+            className="w-full py-2.5 px-4 rounded-input bg-moss text-xs font-semibold disabled:opacity-40"
           >
-            {loading ? "Publishing Ad..." : "Publish Sell Ad"}
+            {loading ? "Publishing..." : "Publish advertisement"}
           </button>
         </form>
       </div>

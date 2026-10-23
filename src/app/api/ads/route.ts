@@ -2,7 +2,7 @@ import { NextRequest } from "next/server";
 import { getPool } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import { listActiveAds, createAd } from "@/lib/services/ads";
-import { parseInr, parseUsdt, formatInr, formatUsdt } from "@/lib/money";
+import { parseInr, parseUsdt, formatInr, formatUsdtDisplay } from "@/lib/money";
 import { jsonResponse, errorResponse } from "@/lib/json";
 
 export async function GET() {
@@ -13,10 +13,10 @@ export async function GET() {
     const formatted = ads.map((ad) => ({
       ...ad,
       priceInr: formatInr(ad.priceInrPaise),
-      totalUsdtFormatted: formatUsdt(ad.totalUsdt),
-      remainingUsdtFormatted: formatUsdt(ad.remainingUsdt),
-      minUsdtFormatted: formatUsdt(ad.minUsdt),
-      maxUsdtFormatted: formatUsdt(ad.maxUsdt),
+      totalUsdtFormatted: formatUsdtDisplay(ad.totalUsdt),
+      remainingUsdtFormatted: formatUsdtDisplay(ad.remainingUsdt),
+      minUsdtFormatted: formatUsdtDisplay(ad.minUsdt),
+      maxUsdtFormatted: formatUsdtDisplay(ad.maxUsdt),
     }));
     return jsonResponse({ ads: formatted });
   } catch (err) {

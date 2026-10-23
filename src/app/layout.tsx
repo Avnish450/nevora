@@ -16,19 +16,19 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className="h-full bg-slate-950 text-slate-100">
-      <body className="min-h-full flex flex-col antialiased">
+    <html lang="en" className="h-full">
+      <body className="min-h-full flex flex-col bg-paper text-ink antialiased">
         <UserProvider>
-          <Suspense fallback={<div className="h-16 bg-slate-900 border-b border-slate-800" />}>
+          <Suspense fallback={<div className="h-14 bg-surface border-b border-line" />}>
             <Header />
           </Suspense>
-          <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8">
-            <Suspense fallback={<div className="p-8 text-center text-slate-500">Loading...</div>}>
+          <main className="flex-1 max-w-[1180px] w-full mx-auto px-4 sm:px-6 py-6 sm:py-8">
+            <Suspense fallback={<div className="p-8 text-center text-xs font-mono text-muted">Loading...</div>}>
               {children}
             </Suspense>
           </main>
-          <footer className="border-t border-slate-800/80 py-4 text-center text-xs text-slate-500">
-            Nevora P2P Escrow Demo • Fake money only • No real blockchain or INR payments
+          <footer className="border-t border-line py-4 text-center text-[11px] text-muted">
+            <p>Nevora · P2P Cryptocurrency Escrow Demo · Fake money only</p>
           </footer>
         </UserProvider>
       </body>

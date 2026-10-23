@@ -13,7 +13,7 @@ import path from "path";
 
 const TEST_DB_URL =
   process.env.DATABASE_URL_TEST ||
-  "postgres://nevora_test:nevora_test@localhost:5433/nevora_test";
+  "postgres://localhost:5432/nevora_test";
 
 let testPool: Pool | null = null;
 

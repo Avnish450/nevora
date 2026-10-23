@@ -7,7 +7,7 @@ import {
   expireOverdueOrders,
 } from "@/lib/services/orders";
 import { getAd } from "@/lib/services/ads";
-import { formatUsdt, formatInr } from "@/lib/money";
+import { formatUsdtDisplay, formatInr } from "@/lib/money";
 import { jsonResponse, errorResponse } from "@/lib/json";
 
 export async function GET(
@@ -64,7 +64,7 @@ export async function GET(
     return jsonResponse({
       order: {
         ...order,
-        usdtAmountFormatted: formatUsdt(order.usdtAmount),
+        usdtAmountFormatted: formatUsdtDisplay(order.usdtAmount),
         priceInrFormatted: formatInr(order.priceInrPaise),
         totalInrFormatted: formatInr(order.totalInrPaise),
         buyerName: buyer?.name || "Buyer",
@@ -74,8 +74,8 @@ export async function GET(
         ? {
             ...ad,
             priceInrFormatted: formatInr(ad.priceInrPaise),
-            totalUsdtFormatted: formatUsdt(ad.totalUsdt),
-            remainingUsdtFormatted: formatUsdt(ad.remainingUsdt),
+            totalUsdtFormatted: formatUsdtDisplay(ad.totalUsdt),
+            remainingUsdtFormatted: formatUsdtDisplay(ad.remainingUsdt),
           }
         : null,
       events,
