@@ -136,7 +136,7 @@ export default function MarketplacePage() {
     <div className="space-y-6 max-w-[1120px] mx-auto">
       {/* ── Page Header & Clear Value Promise ── */}
       <div className="space-y-1">
-        <h1 className="text-2xl font-bold tracking-tight text-ink">
+        <h1 className="text-3xl font-extrabold tracking-tight text-ink font-['Plus_Jakarta_Sans']">
           P2P Marketplace
         </h1>
         <p className="text-sm text-muted max-w-xl">
@@ -145,27 +145,27 @@ export default function MarketplacePage() {
       </div>
 
       {/* ── Controls: Buy / Sell Toggle & Filters Bar ── */}
-      <div className="bg-surface border border-line rounded-card p-3 sm:p-4 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 text-xs shadow-xs">
+      <div className="bg-surface border border-line rounded-[24px] p-4 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4 text-xs shadow-sm">
         {/* Buy / Sell Sliding Segmented Control */}
-        <div className="relative inline-flex bg-paper border border-line rounded-input p-1 self-start">
+        <div className="relative inline-flex bg-surface-subtle border border-line rounded-full p-1 self-start">
           <button
             onClick={() => setSide("buy")}
-            className={`px-4 py-1.5 font-semibold rounded-input relative z-10 transition-colors ${
-              side === "buy" ? "text-ink" : "text-muted hover:text-ink"
+            className={`px-5 py-2 font-bold rounded-full relative z-10 transition-all ${
+              side === "buy" ? "text-white" : "text-muted hover:text-ink"
             }`}
           >
             Buy USDT
           </button>
           <button
             onClick={() => setSide("sell")}
-            className={`px-4 py-1.5 font-semibold rounded-input relative z-10 transition-colors ${
-              side === "sell" ? "text-ink" : "text-muted hover:text-ink"
+            className={`px-5 py-2 font-bold rounded-full relative z-10 transition-all ${
+              side === "sell" ? "text-white" : "text-muted hover:text-ink"
             }`}
           >
             Sell USDT
           </button>
           <div
-            className="absolute top-1 bottom-1 w-[calc(50%-4px)] bg-surface border border-line rounded-input transition-transform duration-200"
+            className="absolute top-1 bottom-1 w-[calc(50%-4px)] bg-[#7D00FF] rounded-full shadow-md shadow-purple-500/25 transition-transform duration-200"
             style={{
               transform: side === "buy" ? "translateX(0)" : "translateX(100%)",
             }}
@@ -173,27 +173,27 @@ export default function MarketplacePage() {
         </div>
 
         {/* Single Row Filters Toolbar */}
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2.5">
           {/* Amount input filter */}
-          <div className="flex items-center bg-paper border border-line rounded-input px-2.5 py-1.5 focus-within:border-moss transition-colors">
-            <span className="text-muted mr-1.5">Amount:</span>
+          <div className="flex items-center bg-surface-subtle border border-line rounded-full px-3.5 py-1.5 focus-within:border-[#7D00FF] transition-all">
+            <span className="text-muted mr-1.5 font-medium">Amount:</span>
             <input
               type="number"
               placeholder="e.g. 50"
               value={amountFilter}
               onChange={(e) => setAmountFilter(e.target.value)}
-              className="bg-transparent w-20 text-ink font-mono text-xs focus:outline-none tabular-nums"
+              className="bg-transparent w-20 text-ink font-mono text-xs font-semibold focus:outline-none tabular-nums"
             />
-            <span className="text-muted text-[10px]">USDT</span>
+            <span className="text-muted text-[10px] font-bold">USDT</span>
           </div>
 
           {/* Payment method selector */}
-          <div className="flex items-center bg-paper border border-line rounded-input px-2.5 py-1.5">
-            <span className="text-muted mr-1.5">Payment:</span>
+          <div className="flex items-center bg-surface-subtle border border-line rounded-full px-3.5 py-1.5">
+            <span className="text-muted mr-1.5 font-medium">Payment:</span>
             <select
               value={paymentFilter}
               onChange={(e) => setPaymentFilter(e.target.value)}
-              className="bg-transparent text-ink text-xs focus:outline-none cursor-pointer"
+              className="bg-transparent text-ink text-xs font-semibold focus:outline-none cursor-pointer"
             >
               <option value="ALL" className="bg-surface">All methods</option>
               <option value="UPI" className="bg-surface">UPI</option>
@@ -203,12 +203,12 @@ export default function MarketplacePage() {
           </div>
 
           {/* Sort selector */}
-          <div className="flex items-center bg-paper border border-line rounded-input px-2.5 py-1.5">
-            <span className="text-muted mr-1.5">Sort:</span>
+          <div className="flex items-center bg-surface-subtle border border-line rounded-full px-3.5 py-1.5">
+            <span className="text-muted mr-1.5 font-medium">Sort:</span>
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value as any)}
-              className="bg-transparent text-ink text-xs focus:outline-none cursor-pointer"
+              className="bg-transparent text-ink text-xs font-semibold focus:outline-none cursor-pointer"
             >
               <option value="price_asc" className="bg-surface">Lowest price</option>
               <option value="price_desc" className="bg-surface">Highest price</option>
@@ -218,7 +218,7 @@ export default function MarketplacePage() {
 
           <button
             onClick={fetchAds}
-            className="px-3 py-1.5 text-xs text-muted hover:text-ink border border-line rounded-input bg-paper ml-auto sm:ml-0 btn-press"
+            className="px-4 py-1.5 text-xs font-semibold text-muted hover:text-ink border border-line rounded-full bg-surface hover:bg-surface-subtle ml-auto sm:ml-0 transition-colors"
             title="Refresh ads"
           >
             Refresh
@@ -346,17 +346,17 @@ export default function MarketplacePage() {
           </div>
 
           {/* Desktop Table View (>= sm) */}
-          <div className="hidden sm:block bg-surface border border-line rounded-card overflow-hidden shadow-xs transition-opacity duration-150">
+          <div className="hidden sm:block bg-surface border border-line rounded-[24px] overflow-hidden shadow-sm transition-opacity duration-150">
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs">
-              <thead className="bg-paper border-b border-line text-muted uppercase text-[10px] tracking-wider font-semibold">
+              <thead className="bg-surface-subtle border-b border-line text-muted uppercase text-[10px] tracking-wider font-semibold">
                 <tr>
-                  <th className="py-3 px-4">Merchant</th>
-                  <th className="py-3 px-4">Price per USDT</th>
-                  <th className="py-3 px-4">Available</th>
-                  <th className="py-3 px-4">Order limit</th>
-                  <th className="py-3 px-4">Payment</th>
-                  <th className="py-3 px-4 text-right">Action</th>
+                  <th className="py-3.5 px-5">Merchant</th>
+                  <th className="py-3.5 px-5">Price per USDT</th>
+                  <th className="py-3.5 px-5">Available</th>
+                  <th className="py-3.5 px-5">Order limit</th>
+                  <th className="py-3.5 px-5">Payment</th>
+                  <th className="py-3.5 px-5 text-right">Action</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-line">
@@ -365,19 +365,19 @@ export default function MarketplacePage() {
                   return (
                     <tr
                       key={ad.id}
-                      className="group hover:bg-paper/50 transition-colors"
+                      className="group hover:bg-surface-subtle/50 transition-colors"
                     >
                       {/* Merchant */}
-                      <td className="py-3.5 px-4">
+                      <td className="py-4 px-5">
                         <div className="flex items-center gap-2">
-                          <span className="font-semibold text-ink text-sm">
+                          <span className="font-bold text-ink text-sm">
                             {ad.sellerName}
                           </span>
-                          <span className="text-[10px] text-buy font-medium bg-paper px-1.5 py-0.5 rounded-tag border border-line">
+                          <span className="text-[10px] text-[#00C278] font-bold bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded-full border border-emerald-200/50 dark:border-emerald-800/50">
                             ✓ 100% (24 trades)
                           </span>
                           {isOwner && (
-                            <span className="text-[10px] px-1.5 py-0.5 rounded-tag bg-paper border border-line text-muted">
+                            <span className="text-[10px] px-2 py-0.5 rounded-full bg-surface-subtle border border-line text-muted font-medium">
                               You
                             </span>
                           )}
@@ -385,36 +385,36 @@ export default function MarketplacePage() {
                       </td>
 
                       {/* Price in INR */}
-                      <td className="py-3.5 px-4 font-mono font-bold text-base text-ink tabular-nums">
+                      <td className="py-4 px-5 font-mono font-bold text-base text-ink tabular-nums">
                         ₹{ad.priceInr}
                       </td>
 
                       {/* Available USDT */}
-                      <td className="py-3.5 px-4 font-mono text-ink tabular-nums">
+                      <td className="py-4 px-5 font-mono text-ink tabular-nums font-medium">
                         {ad.remainingUsdtFormatted} <span className="text-muted text-[10px]">USDT</span>
                       </td>
 
                       {/* Order Limits */}
-                      <td className="py-3.5 px-4 font-mono text-muted tabular-nums">
+                      <td className="py-4 px-5 font-mono text-muted tabular-nums">
                         {ad.minUsdtFormatted} – {ad.maxUsdtFormatted} USDT
                       </td>
 
                       {/* Payment Method */}
-                      <td className="py-3.5 px-4">
-                        <span className="inline-block px-2.5 py-1 rounded-tag text-[11px] font-medium bg-paper border border-line text-ink">
+                      <td className="py-4 px-5">
+                        <span className="inline-block px-3 py-1 rounded-full text-[11px] font-semibold bg-surface-subtle border border-line text-ink">
                           {ad.paymentMethod}
                         </span>
                       </td>
 
                       {/* Action Button */}
-                      <td className="py-3.5 px-4 text-right">
+                      <td className="py-4 px-5 text-right">
                         <button
                           onClick={() => handleOpenBuy(ad)}
                           disabled={isOwner}
-                          className={`px-4 py-2 rounded-input text-xs font-semibold btn-press transition-colors ${
+                          className={`px-5 py-2 rounded-full text-xs font-bold transition-all ${
                             isOwner
-                              ? "bg-paper text-muted border border-line cursor-not-allowed"
-                              : "bg-moss text-white hover:opacity-95 shadow-xs"
+                              ? "bg-surface-subtle text-muted border border-line cursor-not-allowed"
+                              : "btn-moonpay shadow-md shadow-purple-500/20 active:scale-[0.98]"
                           }`}
                         >
                           {isOwner ? "Your ad" : "Buy USDT"}
@@ -432,37 +432,37 @@ export default function MarketplacePage() {
 
       {/* ── Buy Order Modal ── */}
       {selectedAd && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4 z-50">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
           <div
-            className="bg-surface border border-line rounded-card max-w-[440px] w-full p-6 space-y-5 shadow-lg animate-fade-up"
+            className="bg-surface border border-line rounded-[28px] max-w-[440px] w-full p-6 sm:p-7 space-y-5 shadow-2xl animate-fade-up relative"
             style={{
               animation: "fadeUp 200ms cubic-bezier(0.22, 1, 0.36, 1) forwards",
             }}
           >
             <div className="flex items-center justify-between border-b border-line pb-3">
-              <h3 className="text-base font-semibold text-ink">
+              <h3 className="text-lg font-bold text-ink font-['Plus_Jakarta_Sans']">
                 Buy USDT from {selectedAd.sellerName}
               </h3>
               <button
                 onClick={() => setSelectedAd(null)}
-                className="text-muted hover:text-ink text-sm p-1"
+                className="w-7 h-7 rounded-full bg-surface-subtle border border-line flex items-center justify-center text-muted hover:text-ink text-xs transition-colors"
                 aria-label="Close"
               >
                 ✕
               </button>
             </div>
 
-            <div className="bg-paper border border-line rounded-input p-3 space-y-1.5 text-xs">
+            <div className="bg-surface-subtle border border-line rounded-2xl p-4 space-y-2 text-xs">
               <div className="flex justify-between">
-                <span className="text-muted">Unit price:</span>
-                <span className="font-mono font-semibold text-ink tabular-nums">₹{selectedAd.priceInr}</span>
+                <span className="text-muted font-medium">Unit price:</span>
+                <span className="font-mono font-bold text-ink tabular-nums">₹{selectedAd.priceInr}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-muted">Seller available:</span>
-                <span className="font-mono text-ink tabular-nums">{selectedAd.remainingUsdtFormatted} USDT</span>
+                <span className="text-muted font-medium">Seller available:</span>
+                <span className="font-mono font-semibold text-ink tabular-nums">{selectedAd.remainingUsdtFormatted} USDT</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-muted">Trade limits:</span>
+                <span className="text-muted font-medium">Trade limits:</span>
                 <span className="font-mono text-muted tabular-nums">
                   {selectedAd.minUsdtFormatted} – {selectedAd.maxUsdtFormatted} USDT
                 </span>
@@ -471,7 +471,7 @@ export default function MarketplacePage() {
 
             <form onSubmit={handleCreateOrder} className="space-y-4">
               <div>
-                <label className="block text-xs uppercase tracking-wider text-muted font-semibold mb-1">
+                <label className="block text-xs uppercase tracking-wider text-muted font-bold mb-1.5">
                   Amount in USDT to buy
                 </label>
                 <div className="relative">
@@ -482,27 +482,27 @@ export default function MarketplacePage() {
                     onChange={(e) => setBuyAmount(e.target.value)}
                     placeholder="Enter USDT amount"
                     required
-                    className="w-full bg-paper border border-line rounded-input py-2.5 px-3 text-ink font-mono text-xs focus:outline-none focus:border-moss tabular-nums"
+                    className="w-full bg-surface-subtle border border-line rounded-2xl py-3 px-4 text-ink font-mono text-base font-bold focus:outline-none focus:border-[#7D00FF] tabular-nums transition-colors"
                   />
-                  <span className="absolute right-3 top-2.5 text-xs font-mono font-medium text-muted">
+                  <span className="absolute right-4 top-3.5 text-xs font-mono font-bold text-[#7D00FF]">
                     USDT
                   </span>
                 </div>
               </div>
 
-              <div className="bg-paper border border-line rounded-input p-3.5 flex items-center justify-between">
-                <span className="text-xs text-muted">You will pay seller:</span>
-                <span className="text-lg font-mono font-bold text-ink tabular-nums">
+              <div className="bg-surface-subtle border border-line rounded-2xl p-4 flex items-center justify-between">
+                <span className="text-xs text-muted font-medium">You will pay seller:</span>
+                <span className="text-xl font-mono font-extrabold text-[#7D00FF] tabular-nums">
                   {calculateTotalInr()}
                 </span>
               </div>
 
               <p className="text-[11px] text-muted leading-relaxed">
-                Once confirmed, {selectedAd.sellerName}&apos;s USDT will be locked in platform escrow. You will transfer the INR directly to their account.
+                Once confirmed, {selectedAd.sellerName}&apos;s USDT will be locked instantly in smart platform escrow. You will transfer the INR directly to their bank/UPI account.
               </p>
 
               {buyError && (
-                <div className="p-2.5 bg-paper border border-alert/30 rounded-input text-xs text-alert animate-shake">
+                <div className="p-3 bg-red-500/10 border border-alert/30 rounded-2xl text-xs text-alert font-medium animate-shake">
                   {buyError}
                 </div>
               )}
@@ -511,14 +511,14 @@ export default function MarketplacePage() {
                 <button
                   type="button"
                   onClick={() => setSelectedAd(null)}
-                  className="flex-1 py-2.5 px-3 rounded-input border border-line text-xs font-medium text-muted hover:text-ink btn-press"
+                  className="flex-1 py-3 px-4 rounded-full border border-line bg-surface text-xs font-bold text-muted hover:text-ink transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="flex-1 py-2.5 px-3 rounded-input bg-moss text-white text-xs font-semibold disabled:opacity-40 btn-press"
+                  className="flex-1 py-3 px-4 rounded-full btn-moonpay text-xs font-bold disabled:opacity-40 shadow-lg shadow-purple-500/25"
                 >
                   {submitting ? "Locking escrow..." : "Confirm & Lock Escrow"}
                 </button>

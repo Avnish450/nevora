@@ -299,34 +299,34 @@ export default function OrderDetailPage({
   ];
 
   return (
-    <div className="max-w-[1020px] mx-auto space-y-6">
+    <div className="max-w-[1040px] mx-auto space-y-7">
       {/* ── Top Bar: Trade ID & Step Tracker ── */}
-      <div className="bg-surface border border-line rounded-card p-4 sm:p-6 space-y-4 shadow-xs">
+      <div className="bg-surface border border-line rounded-[28px] p-5 sm:p-7 space-y-5 shadow-sm">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-line pb-4">
           <div className="flex items-center gap-3">
-            <span className="text-xs uppercase tracking-wider text-muted font-mono font-semibold">
+            <span className="text-xs uppercase tracking-wider text-[#7D00FF] font-mono font-bold bg-purple-50 dark:bg-purple-950/40 px-2.5 py-1 rounded-full border border-purple-200/50">
               Trade #{order.id}
             </span>
-            <span className="text-xs text-muted">
+            <span className="text-xs text-muted font-medium">
               {isBuyer ? (
-                <>Buying from <strong className="text-ink font-medium">{order.sellerName}</strong></>
+                <>Buying from <strong className="text-ink font-bold">{order.sellerName}</strong></>
               ) : isSeller ? (
-                <>Selling to <strong className="text-ink font-medium">{order.buyerName}</strong></>
+                <>Selling to <strong className="text-ink font-bold">{order.buyerName}</strong></>
               ) : (
                 <>{order.buyerName} &harr; {order.sellerName}</>
               )}
             </span>
           </div>
 
-          {/* Time Countdown (ticks every sec, amber < 5m, gentle pulse < 2m) */}
+          {/* Time Countdown */}
           {timeLeft && order.state === "CREATED" && (
             <div
-              className={`flex items-center gap-2 px-3 py-1.5 rounded-input border text-xs font-mono tabular-nums ${
+              className={`flex items-center gap-2 px-3.5 py-1.5 rounded-full border text-xs font-mono tabular-nums ${
                 isUrgent
                   ? "bg-amber/15 border-amber/40 text-amber animate-gentle-pulse font-bold"
                   : underFiveMin
                   ? "bg-amber/10 border-amber/30 text-amber font-semibold"
-                  : "bg-paper border-line text-ink font-medium"
+                  : "bg-surface-subtle border-line text-ink font-medium"
               }`}
             >
               <span className="text-[11px] font-sans font-medium text-muted">Pay within</span>
@@ -370,14 +370,14 @@ export default function OrderDetailPage({
         {/* Left Column: Trade Details & Actions */}
         <div className={`md:col-span-7 space-y-6 ${mobileTab === "chat" ? "hidden md:block" : "block"}`}>
           {/* Summary Card with Signature Padlock */}
-          <div className="bg-surface border border-line rounded-card p-6 space-y-5 shadow-xs">
+          <div className="bg-surface border border-line rounded-[28px] p-6 sm:p-7 space-y-6 shadow-sm">
             <div className="flex items-center justify-between border-b border-line pb-4">
               <div className="space-y-1">
-                <span className="text-[11px] uppercase tracking-wider text-muted font-medium">
+                <span className="text-[11px] uppercase tracking-wider text-muted font-bold">
                   Escrow Settlement Status
                 </span>
                 <div className="flex items-center gap-2">
-                  <h2 className="text-xl font-bold tracking-tight text-ink">
+                  <h2 className="text-xl sm:text-2xl font-extrabold tracking-tight text-ink font-['Plus_Jakarta_Sans']">
                     {order.state === "CREATED" && "Awaiting INR payment"}
                     {order.state === "PAID" && "Payment marked — awaiting seller release"}
                     {order.state === "RELEASED" && "Trade completed successfully"}
@@ -390,38 +390,38 @@ export default function OrderDetailPage({
 
               {/* Signature Escrow Padlock or Success Checkmark */}
               {isCompleted ? (
-                <AnimatedCheckmark size={32} />
+                <AnimatedCheckmark size={36} />
               ) : (
-                <AnimatedPadlock isLocked={isLocked} size={28} />
+                <AnimatedPadlock isLocked={isLocked} size={32} />
               )}
             </div>
 
             {/* Financial Numbers with Tabular Alignment */}
-            <div className="grid grid-cols-2 gap-4 p-4 rounded-input bg-paper border border-line">
+            <div className="grid grid-cols-2 gap-4 p-5 rounded-2xl bg-surface-subtle border border-line">
               <div className="space-y-1">
-                <span className="text-[11px] text-muted block">You Receive / Transfer</span>
-                <div className="font-mono text-2xl font-bold text-ink tabular-nums">
+                <span className="text-[11px] text-muted font-semibold block">You Receive / Transfer</span>
+                <div className="font-mono text-2xl sm:text-3xl font-extrabold text-[#7D00FF] tabular-nums">
                   {order.usdtAmountFormatted}{" "}
-                  <span className="text-xs text-moss font-sans">USDT</span>
+                  <span className="text-xs text-muted font-sans font-bold">USDT</span>
                 </div>
               </div>
               <div className="space-y-1 text-right">
-                <span className="text-[11px] text-muted block">Total INR Amount</span>
-                <div className="font-mono text-2xl font-bold text-ink tabular-nums">
+                <span className="text-[11px] text-muted font-semibold block">Total INR Amount</span>
+                <div className="font-mono text-2xl sm:text-3xl font-extrabold text-ink tabular-nums">
                   ₹{order.totalInrFormatted}
                 </div>
-                <span className="text-[10px] text-muted font-mono block">
+                <span className="text-[10px] text-muted font-mono font-medium block">
                   @ ₹{order.priceInrFormatted} / USDT
                 </span>
               </div>
             </div>
 
             {/* Escrow Guarantee Status Bar */}
-            <div className="flex items-center gap-2 p-3 rounded-input bg-paper/60 border border-line text-xs text-muted">
-              <span className="w-2 h-2 rounded-full bg-buy" />
+            <div className="flex items-center gap-2.5 p-3.5 rounded-2xl bg-surface-subtle border border-line text-xs text-muted font-medium">
+              <span className="w-2.5 h-2.5 rounded-full bg-[#00C278] shadow-xs" />
               <span>
                 {isLocked
-                  ? "100% of USDT is currently held in platform escrow."
+                  ? "100% of USDT is currently locked in platform escrow."
                   : isCompleted
                   ? "USDT has been credited to the buyer's wallet balance."
                   : "USDT has been unlocked and returned to the seller."}
@@ -431,7 +431,7 @@ export default function OrderDetailPage({
             {/* Payment Details with Copy Fields */}
             {ad && (
               <div className="space-y-3 pt-2 border-t border-line">
-                <h3 className="text-xs uppercase tracking-wider text-muted font-semibold">
+                <h3 className="text-xs uppercase tracking-wider text-muted font-bold">
                   Seller Payment Details ({ad.paymentMethod})
                 </h3>
                 <CopyField
@@ -449,7 +449,7 @@ export default function OrderDetailPage({
             {/* Irreversible Action Area */}
             <div className="pt-4 border-t border-line space-y-3">
               {error && (
-                <div className="p-3 bg-paper border border-alert/30 rounded-input text-xs text-alert animate-shake">
+                <div className="p-3 bg-red-500/10 border border-alert/30 rounded-2xl text-xs text-alert font-medium animate-shake">
                   {error}
                 </div>
               )}
@@ -460,7 +460,7 @@ export default function OrderDetailPage({
                   <button
                     onClick={handleMarkPaid}
                     disabled={actionLoading}
-                    className="w-full py-3 px-4 rounded-input bg-moss text-white text-sm font-semibold hover:opacity-95 disabled:opacity-40 btn-press shadow-xs"
+                    className="w-full py-3.5 px-4 rounded-full btn-moonpay text-sm font-bold shadow-lg shadow-purple-500/25 active:scale-[0.98] transition-all"
                   >
                     {actionLoading ? "Confirming..." : `I Have Paid ₹${order.totalInrFormatted}`}
                   </button>
@@ -471,7 +471,7 @@ export default function OrderDetailPage({
                     <button
                       onClick={handleCancel}
                       disabled={actionLoading}
-                      className="text-xs text-muted hover:text-alert underline"
+                      className="text-xs text-muted hover:text-alert underline font-medium"
                     >
                       Cancel this trade
                     </button>
@@ -485,7 +485,7 @@ export default function OrderDetailPage({
                   <button
                     onClick={() => setShowReleaseModal(true)}
                     disabled={actionLoading}
-                    className="w-full py-3 px-4 rounded-input bg-moss text-white text-sm font-semibold hover:opacity-95 disabled:opacity-40 btn-press shadow-xs"
+                    className="w-full py-3.5 px-4 rounded-full btn-moonpay text-sm font-bold shadow-lg shadow-purple-500/25 active:scale-[0.98] transition-all"
                   >
                     Release {order.usdtAmountFormatted} USDT to Buyer
                   </button>

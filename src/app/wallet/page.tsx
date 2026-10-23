@@ -178,83 +178,85 @@ export default function WalletPage() {
   };
 
   return (
-    <div className="max-w-[1020px] mx-auto space-y-6">
+    <div className="max-w-[1040px] mx-auto space-y-7">
       {/* ── Page Header ── */}
       <div className="space-y-1">
-        <h1 className="text-2xl font-bold tracking-tight text-ink">USDT Wallet</h1>
+        <h1 className="text-3xl font-extrabold tracking-tight text-ink font-['Plus_Jakarta_Sans']">USDT Wallet</h1>
         <p className="text-sm text-muted">
           Your in-app balances, network-first deposits, and simulated crypto withdrawals.
         </p>
       </div>
 
-      {/* ── Balance Cards with One-Line Explanations & Tabular Numbers ── */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      {/* ── MoonPay Style Balance Cards with Tabular Numbers ── */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
         {/* Available Balance */}
-        <div className="bg-surface border border-line rounded-card p-5 space-y-2 shadow-xs">
+        <div className="bg-surface border border-line rounded-[28px] p-6 sm:p-7 space-y-3 shadow-sm hover:border-[#7D00FF]/30 transition-all relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-[#7D00FF]/10 blur-3xl pointer-events-none rounded-full" />
           <div className="flex items-center justify-between">
-            <span className="text-xs uppercase tracking-wider text-muted font-semibold">
+            <span className="text-xs uppercase tracking-wider text-muted font-bold">
               Available balance
             </span>
-            <span className="text-[11px] font-medium text-moss bg-paper px-2 py-0.5 rounded-tag border border-line">
+            <span className="text-[11px] font-bold text-[#7D00FF] bg-purple-50 dark:bg-purple-950/40 px-2.5 py-0.5 rounded-full border border-purple-200/50 dark:border-purple-800/50">
               Ready to trade
             </span>
           </div>
           <div className="flex items-baseline gap-2">
-            <span className="text-3xl font-mono font-bold text-ink tabular-nums">
+            <span className="text-4xl font-mono font-extrabold text-ink tabular-nums">
               {balances?.availableFormatted ?? "0.00"}
             </span>
-            <span className="text-xs font-mono font-medium text-muted">USDT</span>
+            <span className="text-xs font-mono font-bold text-muted">USDT</span>
           </div>
-          <p className="text-xs text-muted pt-1 border-t border-line">
+          <p className="text-xs text-muted pt-2 border-t border-line">
             Available to place new sell ads, buy orders, or withdraw to an external wallet.
           </p>
         </div>
 
         {/* In Escrow Balance */}
-        <div className="bg-surface border border-line rounded-card p-5 space-y-2 shadow-xs">
+        <div className="bg-surface border border-line rounded-[28px] p-6 sm:p-7 space-y-3 shadow-sm hover:border-amber/30 transition-all relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-amber/10 blur-3xl pointer-events-none rounded-full" />
           <div className="flex items-center justify-between">
-            <span className="text-xs uppercase tracking-wider text-muted font-semibold">
+            <span className="text-xs uppercase tracking-wider text-muted font-bold">
               In escrow
             </span>
-            <span className="text-[11px] font-medium text-amber bg-paper px-2 py-0.5 rounded-tag border border-line">
+            <span className="text-[11px] font-bold text-amber bg-amber-500/10 px-2.5 py-0.5 rounded-full border border-amber/30">
               Active trades
             </span>
           </div>
           <div className="flex items-baseline gap-2">
-            <span className="text-3xl font-mono font-bold text-amber tabular-nums">
+            <span className="text-4xl font-mono font-extrabold text-amber tabular-nums">
               {balances?.lockedFormatted ?? "0.00"}
             </span>
-            <span className="text-xs font-mono font-medium text-muted">USDT</span>
+            <span className="text-xs font-mono font-bold text-muted">USDT</span>
           </div>
-          <p className="text-xs text-muted pt-1 border-t border-line">
+          <p className="text-xs text-muted pt-2 border-t border-line">
             Locked in active P2P trades. Released immediately upon trade completion or cancelled.
           </p>
         </div>
       </div>
 
-      {/* ── Action Nav Tabs ── */}
-      <div className="flex border-b border-line gap-6 text-sm">
+      {/* ── MoonPay Style Action Nav Pill Switcher ── */}
+      <div className="inline-flex p-1 bg-surface-subtle border border-line rounded-full gap-1">
         <button
           onClick={() => {
             setActiveTab("overview");
             setWithdrawResult(null);
           }}
-          className={`pb-2.5 font-medium transition-colors ${
+          className={`px-5 py-2 text-xs font-bold rounded-full transition-all ${
             activeTab === "overview"
-              ? "text-moss font-semibold border-b-2 border-moss -mb-px"
+              ? "bg-[#7D00FF] text-white shadow-md shadow-purple-500/25"
               : "text-muted hover:text-ink"
           }`}
         >
-          Overview &amp; recent activity
+          Overview &amp; Activity
         </button>
         <button
           onClick={() => {
             setActiveTab("deposit");
             setWithdrawResult(null);
           }}
-          className={`pb-2.5 font-medium transition-colors ${
+          className={`px-5 py-2 text-xs font-bold rounded-full transition-all ${
             activeTab === "deposit"
-              ? "text-moss font-semibold border-b-2 border-moss -mb-px"
+              ? "bg-[#7D00FF] text-white shadow-md shadow-purple-500/25"
               : "text-muted hover:text-ink"
           }`}
         >
@@ -265,9 +267,9 @@ export default function WalletPage() {
             setActiveTab("withdraw");
             setWithdrawResult(null);
           }}
-          className={`pb-2.5 font-medium transition-colors ${
+          className={`px-5 py-2 text-xs font-bold rounded-full transition-all ${
             activeTab === "withdraw"
-              ? "text-moss font-semibold border-b-2 border-moss -mb-px"
+              ? "bg-[#7D00FF] text-white shadow-md shadow-purple-500/25"
               : "text-muted hover:text-ink"
           }`}
         >
@@ -344,26 +346,26 @@ export default function WalletPage() {
 
       {/* ── TAB 2: NETWORK-FIRST DEPOSIT (FAUCET) ── */}
       {activeTab === "deposit" && (
-        <div className="bg-surface border border-line rounded-card p-6 space-y-6 shadow-xs max-w-xl">
+        <div className="bg-surface border border-line rounded-[28px] p-6 sm:p-8 space-y-6 shadow-sm max-w-xl">
           <div className="space-y-1">
-            <h2 className="text-base font-semibold text-ink">Deposit USDT</h2>
+            <h2 className="text-xl font-bold text-ink font-['Plus_Jakarta_Sans']">Deposit USDT</h2>
             <p className="text-xs text-muted">
-              Select your blockchain network. In this demo environment, you can claim simulated USDT directly to your available balance.
+              Select your settlement blockchain network. In this environment, you can claim simulated USDT directly.
             </p>
           </div>
 
           {/* Network Selection Chips */}
-          <div className="space-y-1.5">
-            <span className="text-xs font-medium text-muted block">1. Select Network</span>
-            <div className="grid grid-cols-3 gap-2">
+          <div className="space-y-2">
+            <span className="text-xs font-bold text-muted block">1. Select Network</span>
+            <div className="grid grid-cols-3 gap-2.5">
               {(["TRC20", "BEP20", "ERC20"] as const).map((net) => (
                 <button
                   key={net}
                   type="button"
                   onClick={() => setDepositNetwork(net)}
-                  className={`py-2 px-3 rounded-input text-xs font-mono font-medium border text-center transition-colors btn-press ${
+                  className={`py-2.5 px-3 rounded-full text-xs font-mono font-bold border text-center transition-all ${
                     depositNetwork === net
-                      ? "bg-paper border-moss text-moss font-semibold shadow-xs"
+                      ? "bg-purple-50 dark:bg-purple-950/40 border-[#7D00FF] text-[#7D00FF] shadow-xs"
                       : "bg-surface border-line text-muted hover:text-ink"
                   }`}
                 >
@@ -374,8 +376,8 @@ export default function WalletPage() {
           </div>
 
           {/* Copyable Deposit Address */}
-          <div className="space-y-1.5">
-            <span className="text-xs font-medium text-muted block">
+          <div className="space-y-2">
+            <span className="text-xs font-bold text-muted block">
               2. Deposit Address ({depositNetwork})
             </span>
             <CopyField
@@ -388,27 +390,27 @@ export default function WalletPage() {
           </div>
 
           {/* Demo Simulated Instant Faucet */}
-          <div className="pt-4 border-t border-line space-y-3">
-            <span className="text-xs font-semibold text-ink block">
-              Demo Environment: Instant Faucet
+          <div className="pt-5 border-t border-line space-y-3">
+            <span className="text-xs font-bold text-ink block">
+              Instant Testnet Faucet
             </span>
             <form onSubmit={handleFaucetDeposit} className="space-y-3">
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-3">
                 <input
                   type="number"
                   min="1"
                   max="10000"
                   value={faucetAmount}
                   onChange={(e) => setFaucetAmount(e.target.value)}
-                  className="bg-paper border border-line rounded-input px-3 py-2 text-xs font-mono text-ink focus:outline-none focus:border-moss w-32 tabular-nums"
+                  className="bg-surface-subtle border border-line rounded-full px-4 py-2.5 text-xs font-mono font-bold text-ink focus:outline-none focus:border-[#7D00FF] w-36 tabular-nums"
                 />
-                <span className="text-xs font-mono text-muted">USDT</span>
+                <span className="text-xs font-mono font-bold text-muted">USDT</span>
                 <button
                   type="submit"
                   disabled={faucetLoading}
-                  className="px-4 py-2 rounded-input bg-moss text-white text-xs font-semibold hover:opacity-95 disabled:opacity-40 btn-press ml-auto shadow-xs"
+                  className="btn-moonpay px-5 py-2.5 text-xs font-bold disabled:opacity-40 ml-auto shadow-md shadow-purple-500/20"
                 >
-                  {faucetLoading ? "Crediting..." : "Claim from faucet"}
+                  {faucetLoading ? "Crediting..." : "Claim USDT"}
                 </button>
               </div>
             </form>
@@ -421,23 +423,23 @@ export default function WalletPage() {
         <div className="space-y-6 max-w-xl">
           {/* Withdrawal Result Confirmation Card */}
           {withdrawResult && (
-            <div className="p-5 rounded-card bg-surface border border-line space-y-3 animate-fade-up shadow-xs">
-              <div className="flex items-center gap-2 text-buy font-semibold text-sm">
+            <div className="p-6 rounded-[28px] bg-surface border border-line space-y-3 animate-fade-up shadow-sm">
+              <div className="flex items-center gap-2 text-[#00C278] font-bold text-sm">
                 <span>✓</span>
                 <span>Withdrawal Broadcasted Successfully</span>
               </div>
-              <div className="p-3 bg-paper border border-line rounded-input space-y-1.5 text-xs font-mono">
+              <div className="p-4 bg-surface-subtle border border-line rounded-2xl space-y-2 text-xs font-mono">
                 <div className="flex justify-between">
-                  <span className="text-muted font-sans">Amount:</span>
+                  <span className="text-muted font-sans font-medium">Amount:</span>
                   <span className="font-bold text-ink tabular-nums">{withdrawResult.amount} USDT</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-muted font-sans">Network:</span>
-                  <span className="text-ink">{withdrawResult.network}</span>
+                  <span className="text-muted font-sans font-medium">Network:</span>
+                  <span className="text-ink font-semibold">{withdrawResult.network}</span>
                 </div>
-                <div className="space-y-1 pt-1 border-t border-line">
+                <div className="space-y-1 pt-2 border-t border-line">
                   <span className="text-muted font-sans block text-[11px]">Transaction Hash:</span>
-                  <span className="break-all text-[11px] text-moss select-all">{withdrawResult.txHash}</span>
+                  <span className="break-all text-[11px] text-[#7D00FF] select-all font-semibold">{withdrawResult.txHash}</span>
                 </div>
               </div>
             </div>
@@ -445,18 +447,18 @@ export default function WalletPage() {
 
           {/* Step 1: Form */}
           {withdrawStep === "form" && (
-            <form onSubmit={handleWithdrawNext} className="bg-surface border border-line rounded-card p-6 space-y-5 shadow-xs">
+            <form onSubmit={handleWithdrawNext} className="bg-surface border border-line rounded-[28px] p-6 sm:p-8 space-y-5 shadow-sm">
               <div className="space-y-1">
-                <h2 className="text-base font-semibold text-ink">Withdraw USDT</h2>
+                <h2 className="text-xl font-bold text-ink font-['Plus_Jakarta_Sans']">Withdraw USDT</h2>
                 <p className="text-xs text-muted">
                   Withdraw your available balance to an external blockchain address.
                 </p>
               </div>
 
               {/* Network Selector */}
-              <div className="space-y-1.5">
-                <label className="text-xs font-medium text-muted block">1. Network</label>
-                <div className="grid grid-cols-3 gap-2">
+              <div className="space-y-2">
+                <label className="text-xs font-bold text-muted block">1. Network</label>
+                <div className="grid grid-cols-3 gap-2.5">
                   {(["TRC20", "BEP20", "ERC20"] as const).map((net) => (
                     <button
                       key={net}
@@ -465,9 +467,9 @@ export default function WalletPage() {
                         setNetwork(net);
                         setAddress(DEPOSIT_ADDRESSES[net]);
                       }}
-                      className={`py-2 px-3 rounded-input text-xs font-mono font-medium border text-center transition-colors btn-press ${
+                      className={`py-2.5 px-3 rounded-full text-xs font-mono font-bold border text-center transition-all ${
                         network === net
-                          ? "bg-paper border-moss text-moss font-semibold shadow-xs"
+                          ? "bg-purple-50 dark:bg-purple-950/40 border-[#7D00FF] text-[#7D00FF] shadow-xs"
                           : "bg-surface border-line text-muted hover:text-ink"
                       }`}
                     >
@@ -478,13 +480,13 @@ export default function WalletPage() {
               </div>
 
               {/* Destination Address */}
-              <div className="space-y-1.5">
+              <div className="space-y-2">
                 <div className="flex justify-between text-xs">
-                  <label className="font-medium text-muted">2. Destination Address</label>
+                  <label className="font-bold text-muted">2. Destination Address</label>
                   <button
                     type="button"
                     onClick={() => setAddress(DEPOSIT_ADDRESSES[network])}
-                    className="text-moss text-[11px] hover:underline"
+                    className="text-[#7D00FF] text-[11px] font-semibold hover:underline"
                   >
                     Use sample address
                   </button>
@@ -495,22 +497,22 @@ export default function WalletPage() {
                   onChange={(e) => setAddress(e.target.value)}
                   placeholder={`Enter ${network} address...`}
                   required
-                  className="w-full bg-paper border border-line rounded-input p-2.5 text-xs font-mono text-ink focus:outline-none focus:border-moss"
+                  className="w-full bg-surface-subtle border border-line rounded-2xl p-3.5 text-xs font-mono text-ink focus:outline-none focus:border-[#7D00FF]"
                 />
                 {addressValidationMsg && (
-                  <p className="text-[11px] text-amber">{addressValidationMsg}</p>
+                  <p className="text-[11px] text-amber font-medium">{addressValidationMsg}</p>
                 )}
               </div>
 
               {/* Amount */}
-              <div className="space-y-1.5">
+              <div className="space-y-2">
                 <div className="flex justify-between text-xs">
-                  <label className="font-medium text-muted">3. Amount</label>
+                  <label className="font-bold text-muted">3. Amount</label>
                   <span className="text-muted text-[11px] font-mono">
                     Avail: {balances?.availableFormatted ?? "0.00"} USDT
                   </span>
                 </div>
-                <div className="flex items-center gap-2 bg-paper border border-line rounded-input px-3 py-2 focus-within:border-moss">
+                <div className="flex items-center gap-2 bg-surface-subtle border border-line rounded-2xl px-4 py-3 focus-within:border-[#7D00FF]">
                   <input
                     type="number"
                     step="any"
@@ -518,12 +520,12 @@ export default function WalletPage() {
                     onChange={(e) => setWithdrawAmount(e.target.value)}
                     placeholder="0.00"
                     required
-                    className="flex-1 bg-transparent text-xs font-mono text-ink focus:outline-none tabular-nums"
+                    className="flex-1 bg-transparent text-sm font-mono font-bold text-ink focus:outline-none tabular-nums"
                   />
                   <button
                     type="button"
                     onClick={() => setWithdrawAmount(balances?.availableFormatted.replace(/,/g, "") || "0")}
-                    className="text-xs font-semibold text-moss px-2 py-0.5 rounded-tag bg-surface border border-line hover:bg-paper"
+                    className="text-xs font-bold text-[#7D00FF] px-2.5 py-1 rounded-full bg-purple-50 dark:bg-purple-950/40 border border-purple-200/50 hover:bg-purple-100"
                   >
                     Max
                   </button>
@@ -531,14 +533,14 @@ export default function WalletPage() {
               </div>
 
               {withdrawError && (
-                <div className="p-2.5 bg-paper border border-alert/30 rounded-input text-xs text-alert animate-shake">
+                <div className="p-3 bg-red-500/10 border border-alert/30 rounded-2xl text-xs text-alert font-medium animate-shake">
                   {withdrawError}
                 </div>
               )}
 
               <button
                 type="submit"
-                className="w-full py-3 rounded-input bg-moss text-white font-semibold text-xs hover:opacity-95 btn-press shadow-xs"
+                className="w-full py-3.5 rounded-full btn-moonpay font-bold text-xs shadow-lg shadow-purple-500/25 active:scale-[0.98] transition-all"
               >
                 Review Withdrawal Summary &rarr;
               </button>
@@ -547,54 +549,54 @@ export default function WalletPage() {
 
           {/* Step 2: Confirmation Dialog */}
           {withdrawStep === "confirm" && (
-            <div className="bg-surface border border-line rounded-card p-6 space-y-5 animate-fade-up shadow-xs">
+            <div className="bg-surface border border-line rounded-[28px] p-6 sm:p-8 space-y-5 animate-fade-up shadow-sm">
               <div className="space-y-1">
-                <h2 className="text-base font-semibold text-ink">Review &amp; Confirm Withdrawal</h2>
+                <h2 className="text-xl font-bold text-ink font-['Plus_Jakarta_Sans']">Review &amp; Confirm Withdrawal</h2>
                 <p className="text-xs text-muted">
                   Double check the destination network and address. Blockchain transactions are irreversible.
                 </p>
               </div>
 
-              <div className="p-4 bg-paper border border-line rounded-input space-y-2 text-xs">
+              <div className="p-5 bg-surface-subtle border border-line rounded-2xl space-y-2.5 text-xs">
                 <div className="flex justify-between">
-                  <span className="text-muted">Network:</span>
-                  <span className="font-mono font-semibold text-ink">{network}</span>
+                  <span className="text-muted font-medium">Network:</span>
+                  <span className="font-mono font-bold text-ink">{network}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-muted">Withdrawal amount:</span>
+                  <span className="text-muted font-medium">Withdrawal amount:</span>
                   <span className="font-mono font-bold text-ink tabular-nums">{withdrawAmount} USDT</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-muted">Network fee:</span>
-                  <span className="font-mono text-buy font-semibold">0.00 USDT (Zero fee)</span>
+                  <span className="text-muted font-medium">Network fee:</span>
+                  <span className="font-mono text-[#00C278] font-bold">0.00 USDT (Zero fee)</span>
                 </div>
                 <div className="space-y-1 pt-2 border-t border-line">
-                  <span className="text-muted block text-[11px]">Recipient Address:</span>
-                  <span className="font-mono text-[11px] text-ink break-all select-all">{address}</span>
+                  <span className="text-muted block text-[11px] font-medium">Recipient Address:</span>
+                  <span className="font-mono text-[11px] text-ink break-all select-all font-semibold">{address}</span>
                 </div>
               </div>
 
               {withdrawError && (
-                <div className="p-2.5 bg-paper border border-alert/30 rounded-input text-xs text-alert animate-shake">
+                <div className="p-3 bg-red-500/10 border border-alert/30 rounded-2xl text-xs text-alert font-medium animate-shake">
                   {withdrawError}
                 </div>
               )}
 
-              <div className="flex gap-3">
+              <div className="flex gap-3 pt-2">
                 <button
                   type="button"
                   onClick={() => setWithdrawStep("form")}
-                  className="flex-1 py-2.5 px-3 rounded-input border border-line text-xs font-medium text-muted hover:text-ink btn-press"
+                  className="flex-1 py-3 px-4 rounded-full border border-line bg-surface text-xs font-bold text-muted hover:text-ink transition-colors"
                 >
-                  Back
+                  &larr; Back
                 </button>
                 <button
                   type="button"
-                  disabled={withdrawLoading}
                   onClick={handleConfirmWithdraw}
-                  className="flex-1 py-2.5 px-3 rounded-input bg-moss text-white text-xs font-semibold disabled:opacity-40 btn-press shadow-xs"
+                  disabled={withdrawLoading}
+                  className="flex-1 py-3 px-4 rounded-full btn-moonpay text-xs font-bold disabled:opacity-40 shadow-lg shadow-purple-500/25"
                 >
-                  {withdrawLoading ? "Broadcasting..." : "Confirm & Send"}
+                  {withdrawLoading ? "Broadcasting..." : "Authorize Withdrawal"}
                 </button>
               </div>
             </div>

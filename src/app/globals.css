@@ -1,20 +1,39 @@
-@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400;1,600&display=swap');
 @import "tailwindcss";
 
+@theme {
+  --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Plus Jakarta Sans', monospace;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+  letter-spacing: -0.025em;
+}
+
 :root {
-  /* Light mode tokens */
-  --ink: #14201C;
-  --paper: #F6F3EC;
+  /* MoonPay Design System — Light Mode */
+  --ink: #0E0D17;
+  --paper: #FAFAFC;
   --surface: #FFFFFF;
-  --line: #DDD8CB;
-  --muted: #6A736E;
-  --moss: #1F5E4B;
-  --moss-hover: #164637;
+  --surface-subtle: #F4F3F8;
+  --line: #E8E6F0;
+  --muted: #6B697D;
+
+  /* MoonPay Signature Electric Violet (#7D00FF) */
+  --primary: #7D00FF;
+  --primary-hover: #6A00DB;
+  --primary-subtle: #F4ECFF;
+  --primary-glow: rgba(125, 0, 255, 0.25);
+  
+  /* Retain token names for compatibility while applying MoonPay palette */
+  --moss: #7D00FF;
+  --moss-hover: #6A00DB;
   --moss-text: #FFFFFF;
-  --buy: #1F7A55;
-  --sell: #B4492F;
-  --amber: #C98A1B;
-  --alert: #B3261E;
+  --buy: #00C278;
+  --sell: #FF4365;
+  --amber: #F59E0B;
+  --alert: #EF4444;
 
   --color-ink: var(--ink);
   --color-paper: var(--paper);
@@ -28,8 +47,10 @@
   --color-amber: var(--amber);
   --color-alert: var(--alert);
 
-  --radius-input: 6px;
-  --radius-card: 10px;
+  /* MoonPay Generous Curves */
+  --radius-input: 12px;
+  --radius-card: 20px;
+  --radius-pill: 9999px;
 
   /* Motion variables */
   --ease-entrance: cubic-bezier(0.22, 1, 0.36, 1);
@@ -41,64 +62,109 @@
 }
 
 .dark {
-  /* Dark mode tokens */
-  --ink: #EDEAE2;
-  --paper: #0F1613;
-  --surface: #17211D;
-  --line: #2A3732;
-  --muted: #93A09A;
-  --moss: #4FA98A;
-  --moss-hover: #3E8D72;
-  --moss-text: #0F1613;
-  --buy: #4FB58A;
-  --sell: #E0775C;
-  --amber: #E8B04A;
-  --alert: #F0746C;
+  /* MoonPay Design System — Midnight Obsidian / Dark Mode */
+  --ink: #F8F7FC;
+  --paper: #08060F;
+  --surface: #120E22;
+  --surface-subtle: #191330;
+  --line: #241D3B;
+  --muted: #9E9BB3;
+
+  --primary: #8F24FF;
+  --primary-hover: #7D00FF;
+  --primary-subtle: rgba(125, 0, 255, 0.18);
+  --primary-glow: rgba(143, 36, 255, 0.35);
+
+  --moss: #8F24FF;
+  --moss-hover: #7D00FF;
+  --moss-text: #FFFFFF;
+  --buy: #10B981;
+  --sell: #FF5A78;
+  --amber: #FBBF24;
+  --alert: #F87171;
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not(.light) {
-    --ink: #EDEAE2;
-    --paper: #0F1613;
-    --surface: #17211D;
-    --line: #2A3732;
-    --muted: #93A09A;
-    --moss: #4FA98A;
-    --moss-hover: #3E8D72;
-    --moss-text: #0F1613;
-    --buy: #4FB58A;
-    --sell: #E0775C;
-    --amber: #E8B04A;
-    --alert: #F0746C;
+    --ink: #F8F7FC;
+    --paper: #08060F;
+    --surface: #120E22;
+    --surface-subtle: #191330;
+    --line: #241D3B;
+    --muted: #9E9BB3;
+
+    --primary: #8F24FF;
+    --primary-hover: #7D00FF;
+    --primary-subtle: rgba(125, 0, 255, 0.18);
+    --primary-glow: rgba(143, 36, 255, 0.35);
+
+    --moss: #8F24FF;
+    --moss-hover: #7D00FF;
+    --moss-text: #FFFFFF;
+    --buy: #10B981;
+    --sell: #FF5A78;
+    --amber: #FBBF24;
+    --alert: #F87171;
   }
 }
 
 body {
   background-color: var(--paper);
   color: var(--ink);
-  font-family: 'Instrument Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  background-image: 
+    radial-gradient(ellipse 80% 50% at 50% -20%, rgba(125, 0, 255, 0.08), transparent 70%);
+}
+
+.dark body, body.dark {
+  background-image: 
+    radial-gradient(ellipse 80% 50% at 50% -20%, rgba(125, 0, 255, 0.15), transparent 70%);
 }
 
 /* Monospace numerals with tabular alignment */
 .font-mono, .tabular-nums {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: 'JetBrains Mono', 'Plus Jakarta Sans', monospace;
   font-feature-settings: 'tnum';
   font-variant-numeric: tabular-nums;
 }
 
 /* Spacing and Radius helper utilities */
 .rounded-input {
-  border-radius: 6px;
+  border-radius: var(--radius-input);
 }
 
 .rounded-card {
-  border-radius: 10px;
+  border-radius: var(--radius-card);
 }
 
-.rounded-tag {
+.rounded-tag, .rounded-pill {
+  border-radius: var(--radius-pill);
+}
+
+/* MoonPay UI Utilities */
+.btn-moonpay {
+  background: var(--primary);
+  color: #FFFFFF;
   border-radius: 9999px;
+  font-weight: 600;
+  transition: all 150ms cubic-bezier(0.22, 1, 0.36, 1);
+  box-shadow: 0 4px 16px -2px var(--primary-glow);
+}
+
+.btn-moonpay:hover {
+  background: var(--primary-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 8px 24px -4px var(--primary-glow);
+}
+
+.btn-moonpay:active {
+  transform: scale(0.98);
+}
+
+.glow-purple {
+  box-shadow: 0 0 30px var(--primary-glow);
 }
 
 /* Hairline border utility */

@@ -81,14 +81,17 @@ export default function TradeCard() {
   }, [inrAmount, rateInr]);
 
   return (
-    <div className="bg-surface border border-line rounded-card p-6 shadow-sm space-y-5 max-w-md w-full">
+    <div className="bg-surface border border-line rounded-[28px] p-6 sm:p-7 shadow-2xl shadow-purple-500/10 space-y-5 max-w-[420px] w-full backdrop-blur-md relative overflow-hidden">
+      {/* Subtle top ambient glow */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-48 h-12 bg-[#7D00FF]/15 blur-2xl pointer-events-none rounded-full" />
+
       {/* Buy / Sell Sliding Segmented Toggle */}
-      <div className="p-1 bg-paper border border-line rounded-input flex relative">
+      <div className="p-1 bg-surface-subtle border border-line rounded-full flex relative">
         <button
           type="button"
           onClick={() => setTab("buy")}
-          className={`flex-1 py-1.5 text-xs font-semibold rounded-input transition-colors relative z-10 ${
-            tab === "buy" ? "text-ink shadow-xs" : "text-muted hover:text-ink"
+          className={`flex-1 py-2 text-xs font-bold rounded-full transition-all relative z-10 ${
+            tab === "buy" ? "text-white" : "text-muted hover:text-ink"
           }`}
         >
           Buy USDT
@@ -96,74 +99,108 @@ export default function TradeCard() {
         <button
           type="button"
           onClick={() => setTab("sell")}
-          className={`flex-1 py-1.5 text-xs font-semibold rounded-input transition-colors relative z-10 ${
-            tab === "sell" ? "text-ink shadow-xs" : "text-muted hover:text-ink"
+          className={`flex-1 py-2 text-xs font-bold rounded-full transition-all relative z-10 ${
+            tab === "sell" ? "text-white" : "text-muted hover:text-ink"
           }`}
         >
           Sell USDT
         </button>
-        {/* Sliding active pill (200ms) */}
+        {/* Sliding active pill (200ms) with MoonPay purple */}
         <div
-          className="absolute top-1 bottom-1 w-[calc(50%-4px)] bg-surface border border-line rounded-input transition-transform duration-200"
+          className="absolute top-1 bottom-1 w-[calc(50%-4px)] bg-[#7D00FF] rounded-full shadow-md shadow-purple-500/30 transition-transform duration-200"
           style={{
             transform: tab === "buy" ? "translateX(0)" : "translateX(100%)",
           }}
         />
       </div>
 
-      {/* Pay In INR Input */}
+      {/* You Pay (INR) Container */}
       <div className="space-y-1.5">
-        <div className="flex items-center justify-between text-xs">
-          <span className="text-muted font-medium">You pay</span>
-          <span className="text-muted text-[11px]">Instant UPI / IMPS</span>
+        <div className="flex items-center justify-between text-xs px-1">
+          <span className="text-muted font-semibold tracking-wide">You pay</span>
+          <span className="text-muted text-[11px] font-medium">Instant transfer</span>
         </div>
-        <div className="flex items-center justify-between bg-paper border border-line rounded-input px-3.5 py-2.5 focus-within:border-moss transition-colors">
-          <div className="flex items-center gap-1">
-            <span className="text-muted font-mono font-medium">₹</span>
-            <input
-              type="number"
-              value={inrAmount}
-              onChange={(e) => setInrAmount(e.target.value)}
-              placeholder="5000"
-              className="bg-transparent text-lg font-mono font-semibold text-ink focus:outline-none w-36 tabular-nums"
-              min="100"
-            />
+        <div className="bg-surface-subtle border border-line rounded-2xl p-4 focus-within:border-[#7D00FF] transition-all flex items-center justify-between gap-3">
+          <div className="flex-1">
+            <div className="flex items-baseline gap-1">
+              <span className="text-lg font-bold text-muted font-mono">₹</span>
+              <input
+                type="number"
+                value={inrAmount}
+                onChange={(e) => setInrAmount(e.target.value)}
+                placeholder="5000"
+                className="bg-transparent text-2xl sm:text-3xl font-mono font-bold text-ink focus:outline-none w-full tabular-nums"
+                min="100"
+              />
+            </div>
+            <span className="text-[11px] text-muted block mt-0.5">Min ₹500 · Max ₹2,00,000</span>
           </div>
-          <span className="text-xs font-semibold text-ink px-2 py-1 bg-surface border border-line rounded-input">
-            INR
-          </span>
+
+          {/* Currency Badge */}
+          <div className="flex items-center gap-2 bg-surface border border-line px-3 py-1.5 rounded-full shadow-xs shrink-0">
+            <span className="w-5 h-5 rounded-full bg-amber-500/15 text-amber-600 dark:text-amber-400 font-bold text-xs flex items-center justify-center">
+              ₹
+            </span>
+            <span className="text-xs font-bold text-ink">INR</span>
+          </div>
         </div>
       </div>
 
-      {/* You Receive In USDT Preview with 200ms number tween */}
-      <div className="space-y-1.5">
-        <div className="flex items-center justify-between text-xs">
-          <span className="text-muted font-medium">You receive</span>
-          <span className="text-muted text-[11px]">In Nevora Escrow</span>
-        </div>
-        <div className="flex items-center justify-between bg-paper border border-line rounded-input px-3.5 py-2.5">
-          <span className="text-lg font-mono font-bold text-ink tabular-nums transition-all duration-200">
-            {receiveUsdt}
-          </span>
-          <span className="text-xs font-semibold text-moss px-2 py-1 bg-surface border border-line rounded-input">
-            USDT
-          </span>
+      {/* Inverted Rate & Swap Divider */}
+      <div className="relative flex items-center justify-center py-0.5">
+        <div className="w-full border-t border-line/60" />
+        <div className="absolute bg-surface border border-line rounded-full p-1.5 shadow-sm hover:border-[#7D00FF] text-muted hover:text-[#7D00FF] transition-colors cursor-pointer">
+          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
+          </svg>
         </div>
       </div>
 
-      {/* Network Chips (TRC20, BEP20, ERC20) */}
+      {/* You Receive (USDT) Container */}
       <div className="space-y-1.5">
-        <span className="text-[11px] font-medium text-muted block">Settlement Network</span>
+        <div className="flex items-center justify-between text-xs px-1">
+          <span className="text-muted font-semibold tracking-wide">You receive</span>
+          <span className="text-[11px] font-semibold text-[#00C278] flex items-center gap-1">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#00C278] animate-pulse" />
+            Zero fee
+          </span>
+        </div>
+        <div className="bg-surface-subtle border border-line rounded-2xl p-4 flex items-center justify-between gap-3">
+          <div className="flex-1">
+            <div className="text-2xl sm:text-3xl font-mono font-bold text-ink tabular-nums">
+              {receiveUsdt}
+            </div>
+            <span className="text-[11px] text-muted block mt-0.5">Deposited directly to Escrow</span>
+          </div>
+
+          {/* Token Selector Badge */}
+          <div className="flex items-center gap-2 bg-surface border border-line px-3 py-1.5 rounded-full shadow-xs shrink-0">
+            {/* Tether Green Token Icon */}
+            <div className="w-5 h-5 rounded-full bg-[#00C278] text-white flex items-center justify-center font-bold text-[10px]">
+              ₮
+            </div>
+            <span className="text-xs font-bold text-ink">USDT</span>
+            <span className="text-[10px] text-muted">▾</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Network Chips */}
+      <div className="space-y-1.5">
+        <div className="flex items-center justify-between text-[11px] px-1">
+          <span className="font-semibold text-muted">Network</span>
+          <span className="text-muted font-mono">{selectedNetwork} standard</span>
+        </div>
         <div className="flex gap-2">
           {["TRC20", "BEP20", "ERC20"].map((net) => (
             <button
               key={net}
               type="button"
               onClick={() => setSelectedNetwork(net)}
-              className={`flex-1 py-1.5 px-2 rounded-input text-xs font-mono font-medium border transition-colors ${
+              className={`flex-1 py-1.5 px-2 rounded-full text-xs font-mono font-semibold border transition-all ${
                 selectedNetwork === net
-                  ? "bg-paper border-moss text-moss font-semibold"
-                  : "bg-surface border-line text-muted hover:text-ink"
+                  ? "bg-purple-50 dark:bg-purple-950/50 border-[#7D00FF] text-[#7D00FF] shadow-xs"
+                  : "bg-surface border-line text-muted hover:text-ink hover:border-line/80"
               }`}
             >
               {net}
@@ -172,27 +209,18 @@ export default function TradeCard() {
         </div>
       </div>
 
-      {/* Live Best Ad & Rate with 30s Countdown Ring */}
-      <div className="p-3 bg-paper border border-line rounded-input flex items-center justify-between text-xs">
-        <div className="space-y-0.5">
-          <div className="flex items-center gap-1.5">
-            <span className="text-muted">Best Rate:</span>
-            <span className="font-mono font-bold text-ink tabular-nums">
-              ₹{rateInr.toFixed(2)}
-            </span>
-            <span className="text-[10px] text-muted font-sans">/ USDT</span>
-          </div>
-          <div className="text-[11px] text-muted">
-            by{" "}
-            <strong className="text-ink font-medium">
-              {bestAd ? bestAd.seller_name : "Alice"}
-            </strong>{" "}
-            (100% completion)
-          </div>
+      {/* Rate & Refresh bar */}
+      <div className="p-3 bg-surface-subtle border border-line rounded-2xl flex items-center justify-between text-xs">
+        <div className="flex items-center gap-2">
+          <span className="text-muted text-[11px]">1 USDT ≈</span>
+          <span className="font-mono font-bold text-ink tabular-nums text-sm">
+            ₹{rateInr.toFixed(2)}
+          </span>
         </div>
 
         {/* 30-Second Refresh SVG Ring */}
-        <div className="flex items-center gap-1.5 text-muted" title="Rate refreshes every 30s">
+        <div className="flex items-center gap-2 text-muted text-[11px]" title="Rate refreshed every 30s">
+          <span className="text-[10px] font-medium hidden sm:inline">Auto-refresh</span>
           <svg width="18" height="18" viewBox="0 0 24 24" className="rotate-[-90deg]">
             <circle
               cx="12"
@@ -206,7 +234,7 @@ export default function TradeCard() {
               cx="12"
               cy="12"
               r="10"
-              stroke="var(--moss)"
+              stroke="#7D00FF"
               strokeWidth="2.5"
               fill="none"
               strokeDasharray="62.8"
@@ -219,17 +247,24 @@ export default function TradeCard() {
         </div>
       </div>
 
-      {/* CTA Button */}
+      {/* MoonPay Signature CTA Button */}
       <Link
         href={`/marketplace`}
-        className="w-full flex items-center justify-center py-3 rounded-input bg-moss text-white font-semibold text-sm hover:opacity-95 transition-opacity btn-press shadow-xs"
+        className="w-full flex items-center justify-center gap-2 py-3.5 rounded-full btn-moonpay text-sm font-bold tracking-wide shadow-lg shadow-purple-500/25 active:scale-[0.98] transition-all"
       >
-        {tab === "buy" ? "Buy USDT with 0% fee" : "Sell USDT safely"}
+        <span>{tab === "buy" ? "Continue to Buy USDT" : "Continue to Sell USDT"}</span>
+        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+        </svg>
       </Link>
 
-      <p className="text-[11px] text-center text-muted">
-        Zero trading fees · Funds locked in audited platform escrow
-      </p>
+      {/* MoonPay Trust Guarantee */}
+      <div className="flex items-center justify-center gap-2 text-[11px] text-muted text-center pt-0.5">
+        <svg className="w-3.5 h-3.5 text-[#00C278]" viewBox="0 0 20 20" fill="currentColor">
+          <path fillRule="evenodd" d="M10 1.944A11.954 11.954 0 012.166 5C2.056 5.649 2 6.319 2 7c0 5.225 3.34 9.67 8 11.317C14.66 16.67 18 12.225 18 7c0-.682-.057-1.35-.166-2.001A11.954 11.954 0 0110 1.944zm3.707 6.763a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+        </svg>
+        <span>Protected by double-entry escrow · Instant release</span>
+      </div>
     </div>
   );
 }
